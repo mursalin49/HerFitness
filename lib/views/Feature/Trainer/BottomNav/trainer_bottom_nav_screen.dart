@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../../utils/AppColor/app_colors.dart';
+import '../Home/trainer_home_screen.dart';
 import '../Schedule/schedule_screen.dart';
+import '../Classes/my_classes_screen.dart';
+import '../Profile/trainer_profile_screen.dart';
 
 class TrainerBottomNavScreen extends StatefulWidget {
   final int initialIndex;
@@ -40,13 +43,13 @@ class _TrainerBottomNavScreenState extends State<TrainerBottomNavScreen> {
     });
   }
 
-  // Placeholder pages for demonstration
+  // Finalized pages for navigation
   final List<Widget> _pages = [
-    const Scaffold(body: Center(child: Text("Home"))),
-    const Scaffold(body: Center(child: Text("Classes"))),
+    const TrainerHomeScreen(),
+    MyClassesScreen(),
     const ScheduleScreen(),
     const Scaffold(body: Center(child: Text("Groups"))),
-    const Scaffold(body: Center(child: Text("Trainer Profile"))),
+    const TrainerProfileScreen(),
   ];
 
   @override
