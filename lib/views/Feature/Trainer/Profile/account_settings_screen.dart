@@ -3,6 +3,7 @@ import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../Helpers/route.dart';
 
@@ -35,28 +36,191 @@ class AccountSettingsScreen extends StatelessWidget {
                 
                 SizedBox(height: 24.h),
                 _buildSectionTitle("Security & Privacy"),
-                _buildSettingItem(icon: Icons.lock_outline_rounded, title: "Change Password", onTap: () {}),
-                _buildSettingItem(icon: Icons.description_outlined, title: "Privacy Policy", onTap: () {}),
-                _buildSettingItem(icon: Icons.gavel_outlined, title: "Terms of Service", onTap: () {}),
+                _buildSettingItem(
+                  icon: Icons.lock_outline_rounded,
+                  title: "Change Password",
+                  onTap: () => Get.toNamed(AppRoutes.profileChangePasswordScreen),
+                ),
+                _buildSettingItem(
+                  icon: Icons.description_outlined,
+                  title: "Privacy Policy",
+                  onTap: () => Get.toNamed(AppRoutes.privacyPolicyScreen),
+                ),
+                _buildSettingItem(
+                  icon: Icons.gavel_outlined,
+                  title: "Terms of Service",
+                  onTap: () => Get.toNamed(AppRoutes.termsOfServiceScreen),
+                ),
                 
                 SizedBox(height: 24.h),
                 _buildSectionTitle("Help & Support"),
-                _buildSettingItem(icon: Icons.info_outline_rounded, title: "About Us", onTap: () {}),
-                _buildSettingItem(icon: Icons.chat_bubble_outline_rounded, title: "Help Center", onTap: () {}),
+                _buildSettingItem(
+                  icon: Icons.info_outline_rounded,
+                  title: "About Us",
+                  onTap: () => Get.toNamed(AppRoutes.aboutUsScreen),
+                ),
+                _buildSettingItem(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  title: "Help Center",
+                  onTap: () => Get.toNamed(AppRoutes.helpCenterScreen),
+                ),
                 
                 SizedBox(height: 24.h),
                 _buildSectionTitle("Danger Zone"),
-                _buildDeleteAccountButton(),
+                _buildDeleteAccountButton(context),
                 
                 SizedBox(height: 24.h),
                 _buildSectionTitle("Log Out"),
-                _buildSettingItem(icon: Icons.logout_rounded, title: "Sign Out", onTap: () {}),
+                _buildSettingItem(
+                  icon: Icons.logout_rounded,
+                  title: "Sign Out",
+                  onTap: () => _showLogoutDialog(context),
+                ),
                 
                 SizedBox(height: 40.h),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // -------------------- Delete Confirmation Dialog --------------------
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        child: Padding(
+          padding: EdgeInsets.all(10.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  shape: BoxShape.circle,
+                ),
+                child: SvgPicture.asset("assets/icons/deleteIcon.svg", color: Colors.redAccent),
+              ),
+              SizedBox(height: 16.h),
+              AppText(
+                "Delete Account",
+                style: AppTextStyles.base16SemiBold.copyWith(fontSize: 18.sp),
+              ),
+              SizedBox(height: 8.h),
+              AppText(
+                "Are you sure to delete this account?",
+                textAlign: TextAlign.center,
+                style: AppTextStyles.sm14Regular.copyWith(color: const Color(0xFF454F5B)),
+              ),
+              SizedBox(height: 16.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                      ),
+                      child: AppText("Cancel", style: AppTextStyles.sm14Medium.copyWith(color: Colors.black)),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        // Handle delete logic here
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF4444),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        elevation: 0,
+                      ),
+                      child: AppText("Delete", style: AppTextStyles.sm14Medium.copyWith(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // -------------------- Logout Confirmation Dialog --------------------
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        child: Padding(
+          padding: EdgeInsets.all(10.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: AppColors.actionPrimary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.logout_rounded, color: AppColors.actionPrimary, size: 32.w),
+              ),
+              SizedBox(height: 16.h),
+              AppText(
+                "Log Out",
+                style: AppTextStyles.base16SemiBold.copyWith(fontSize: 18.sp),
+              ),
+              SizedBox(height: 8.h),
+              AppText(
+                "Are you sure you want to log out of this account?",
+                textAlign: TextAlign.center,
+                style: AppTextStyles.sm14Regular.copyWith(color: const Color(0xFF454F5B)),
+              ),
+              SizedBox(height: 16.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                      ),
+                      child: AppText("Cancel", style: AppTextStyles.sm14Medium.copyWith(color: Colors.black)),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.offAllNamed(AppRoutes.signInScreen);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.actionPrimary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        elevation: 0,
+                      ),
+                      child: AppText("Log Out", style: AppTextStyles.sm14Medium.copyWith(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -146,7 +310,7 @@ class AccountSettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDeleteAccountButton() {
+  Widget _buildDeleteAccountButton(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -154,12 +318,12 @@ class AccountSettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: ListTile(
-        onTap: () {},
+        onTap: () => _showDeleteDialog(context),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
         leading: Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: const Icon(Icons.lock_outline_rounded, color: Colors.white, size: 22),

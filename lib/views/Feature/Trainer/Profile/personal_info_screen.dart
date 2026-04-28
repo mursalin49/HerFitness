@@ -25,6 +25,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final TextEditingController _certController = TextEditingController();
   final TextEditingController _hostModeController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _tagController = TextEditingController();
+  List<String> _teachClasses = ["Yoga", "Strength Training"];
+  String? _selectedHostMode;
+  final List<String> _hostModeOptions = ["Online", "In person", "Both"];
 
   @override
   void dispose() {
@@ -37,6 +41,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     _certController.dispose();
     _hostModeController.dispose();
     _locationController.dispose();
+    _tagController.dispose();
     super.dispose();
   }
 
@@ -53,11 +58,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 20),
+                  SizedBox(height: 30),
 
                   _buildLabel("Full Name"),
                   CustomTextField(
-                    prefixIcon: Icon(Icons.person_outline_rounded, size: 20.w),
+                    prefixIcon: "assets/icons/personIcon.svg",
                     hintText: "Enter your name",
                     controller: _nameController,
                   ),
@@ -65,9 +70,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   
                   _buildLabel("Email Address"),
                   CustomTextField(
-                    prefixIcon: Icon(Icons.email_outlined, size: 20.w),
                     hintText: "Enter your E-mail",
                     controller: _emailController,
+                    prefixIcon: "assets/icons/emailIcon.svg",
                   ),
                   SizedBox(height: 16.h),
                   
@@ -105,7 +110,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     controller: _durationController,
                   ),
                   SizedBox(height: 16.h),
-                  
                   _buildLabel("What certifications/qualifications do you have?"),
                   CustomTextField(
                     maxLines: 4,
@@ -115,10 +119,36 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   SizedBox(height: 16.h),
                   
                   _buildLabel("Do you host classes online or in person?"),
-                  CustomTextField(
-                    hintText: "e.g. Online, In person, or Both",
-                    suffixIcon: Icon(Icons.keyboard_arrow_down_rounded, size: 20.w),
-                    controller: _hostModeController,
+                  DropdownButtonFormField<String>(
+                    value: _selectedHostMode,
+                    icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20.w),
+                    decoration: InputDecoration(
+                      hintText: "e.g. Online, In person, or Both",
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.actionPrimary),
+                      ),
+                    ),
+                    items: _hostModeOptions.map((String mode) {
+                      return DropdownMenuItem<String>(
+                        value: mode,
+                        child: AppText(mode, style: AppTextStyles.sm14Medium),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedHostMode = newValue;
+                      });
+                    },
                   ),
                   SizedBox(height: 16.h),
                   
@@ -194,35 +224,58 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             ),
           ),
           Positioned(
-            bottom: -45.h,
+            bottom: -50.h,
             left: 0,
             right: 0,
             child: Center(
               child: Stack(
-                alignment: Alignment.bottomRight,
+                alignment: Alignment.bottomCenter,
+                clipBehavior: Clip.none,
                 children: [
                   Container(
-                    width: 80.w,
+                    width: 87.w,
                     height: 80.w,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.r),
+                      borderRadius: BorderRadius.circular(24.r),
                       image: const DecorationImage(
                         image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
                         fit: BoxFit.cover,
                       ),
-                      border: Border.all(color: Colors.white, width: 4.w),
+                      border: Border.all(color: Colors.white, width: 2.w),
                     ),
                   ),
                   Positioned(
-                    bottom: 0,
+                    bottom: -20.h,
+                    left: 0,
                     right: 0,
-                    child: Container(
-                      padding: EdgeInsets.all(4.w),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                    child: Center(
+                      child: Container(
+                        padding: EdgeInsets.all(3.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.all(8.w),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: SvgPicture.asset(
+                            "assets/icons/editIcon.svg",
+                            color: Colors.white,
+                            width: 18.w,
+                            height: 18.w,
+                          ),
+                        ),
                       ),
-                      child: SvgPicture.asset("assets/icons/editIcon.svg"),
                     ),
                   ),
                 ],
@@ -253,29 +306,89 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         border: Border.all(color: AppColors.actionPrimary.withOpacity(0.5)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _buildTag("Yoga"),
-              SizedBox(width: 8.w),
-              AppText(
-                "Strength Training",
-                style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+              ..._teachClasses.map((tag) => _buildDynamicTag(tag)),
+              SizedBox(
+                width: 100.w,
+                child: TextField(
+                  controller: _tagController,
+                  style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+                  decoration: const InputDecoration(
+                    hintText: "Add...",
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: (value) {
+                    if (value.endsWith(" ")) {
+                      _addTag(value.trim());
+                    }
+                  },
+                  onSubmitted: (value) {
+                    _addTag(value.trim());
+                  },
+                ),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 12.h),
           Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Icon(Icons.description_outlined, size: 14.w, color: Colors.grey),
               SizedBox(width: 4.w),
               AppText(
-                "2/10",
+                "${_teachClasses.length}/10",
                 style: AppTextStyles.xs12Regular.copyWith(color: Colors.grey),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addTag(String tag) {
+    if (tag.isNotEmpty && _teachClasses.length < 10) {
+      setState(() {
+        if (!_teachClasses.contains(tag)) {
+          _teachClasses.add(tag);
+        }
+        _tagController.clear();
+      });
+    } else {
+      _tagController.clear();
+    }
+  }
+
+  Widget _buildDynamicTag(String text) {
+    return Container(
+      padding: EdgeInsets.only(left: 12.w, right: 6.w, top: 4.h, bottom: 4.h),
+      decoration: BoxDecoration(
+        color: AppColors.actionPrimary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppText(
+            text,
+            style: AppTextStyles.xs12Regular.copyWith(color: AppColors.actionPrimary, fontWeight: FontWeight.w600),
+          ),
+          SizedBox(width: 4.w),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _teachClasses.remove(text);
+              });
+            },
+            child: Icon(Icons.close, size: 14.w, color: AppColors.actionPrimary),
           ),
         ],
       ),

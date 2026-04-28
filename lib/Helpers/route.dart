@@ -14,8 +14,13 @@ import '../views/Feature/Trainer/Profile/account_settings_screen.dart';
 import '../views/Feature/Trainer/Profile/notification_settings_screen.dart';
 import '../views/Feature/Trainer/Profile/personal_info_screen.dart';
 import '../views/Feature/Trainer/Profile/trainer_profile_screen.dart';
+import '../views/Feature/Trainer/Profile/change_password_screen.dart' as profile;
 import '../views/Feature/Trainer/Schedule/schedule_screen.dart';
 import '../views/Feature/common/notification_screen.dart';
+import '../views/Feature/common/privacy_policy_screen.dart';
+import '../views/Feature/common/terms_of_service_screen.dart';
+import '../views/Feature/common/about_us_screen.dart';
+import '../views/Feature/common/help_center_screen.dart';
 
 class AppRoutes{
   static String splashScreen="/splash_screen";
@@ -34,6 +39,11 @@ class AppRoutes{
   static String accountSettingsScreen ="/account_settings_screen";
   static String personalInfoScreen ="/personal_info_screen";
   static String notificationSettingsScreen ="/notification_settings_screen";
+  static String profileChangePasswordScreen ="/profile_change_password_screen";
+  static String privacyPolicyScreen ="/privacy_policy_screen";
+  static String termsOfServiceScreen ="/terms_of_service_screen";
+  static String aboutUsScreen ="/about_us_screen";
+  static String helpCenterScreen ="/help_center_screen";
   static String trainerBottomNavScreen="/trainer_bottom_nav_screen";
 
   static final List<GetPage>page=[
@@ -53,6 +63,11 @@ class AppRoutes{
     GetPage(name: accountSettingsScreen, page: ()=> const AccountSettingsScreen()),
     GetPage(name: personalInfoScreen, page: ()=> const PersonalInfoScreen()),
     GetPage(name: notificationSettingsScreen, page: ()=> const NotificationSettingsScreen()),
+    GetPage(name: profileChangePasswordScreen, page: ()=> const profile.ChangePasswordScreen()),
+    GetPage(name: privacyPolicyScreen, page: ()=> const PrivacyPolicyScreen()),
+    GetPage(name: termsOfServiceScreen, page: ()=> const TermsOfServiceScreen()),
+    GetPage(name: aboutUsScreen, page: ()=> const AboutUsScreen()),
+    GetPage(name: helpCenterScreen, page: ()=> const HelpCenterScreen()),
     GetPage(name: trainerBottomNavScreen, page: ()=> const TrainerBottomNavScreen()),
   ];
 }
