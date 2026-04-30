@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import '../views/Feature/Auth/sign_in_screen.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_one.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_three.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_two.dart';
 import '../views/Feature/SplashScreen/splash_screen.dart';
 import '../views/Feature/Auth/Welcome/welcome_screen.dart';
 import '../views/Feature/Auth/role_selection_screen.dart';
@@ -21,6 +24,9 @@ import '../views/Feature/common/privacy_policy_screen.dart';
 import '../views/Feature/common/terms_of_service_screen.dart';
 import '../views/Feature/common/about_us_screen.dart';
 import '../views/Feature/common/help_center_screen.dart';
+
+
+
 
 class AppRoutes{
   static String splashScreen="/splash_screen";
@@ -44,7 +50,13 @@ class AppRoutes{
   static String termsOfServiceScreen ="/terms_of_service_screen";
   static String aboutUsScreen ="/about_us_screen";
   static String helpCenterScreen ="/help_center_screen";
-  static String trainerBottomNavScreen="/trainer_bottom_nav_screen";
+  static String trainerBottomNavScreen ="/trainer_bottom_nav_screen";
+  static String assessmentNumberOneScreen ="/assessment_number_one";
+  static String assessmentNumberTwoScreen ="/assessment_number_two";
+  static String assessmentNumberThreeScreen ="/assessment_number_three";
+
+
+
 
   static final List<GetPage>page=[
     GetPage(name: splashScreen, page: ()=> const SplashScreen()),
@@ -69,5 +81,10 @@ class AppRoutes{
     GetPage(name: aboutUsScreen, page: ()=> const AboutUsScreen()),
     GetPage(name: helpCenterScreen, page: ()=> const HelpCenterScreen()),
     GetPage(name: trainerBottomNavScreen, page: ()=> const TrainerBottomNavScreen()),
+    GetPage(name: assessmentNumberOneScreen, page: ()=> AssessmentNumberOneScreen()),
+    GetPage(name: assessmentNumberTwoScreen, page: ()=> AssessmentNumberTwoScreen()),
+    GetPage(name: assessmentNumberThreeScreen, page: ()=> AssessmentNumberThreeScreen()),
+
+
   ];
 }

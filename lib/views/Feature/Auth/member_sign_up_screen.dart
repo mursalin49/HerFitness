@@ -200,7 +200,12 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           ),
                           SizedBox(height: MediaQuery.of(context).size.height * 0.040),
 
-                          AppButton(text: "Sign up", onTap: (){}),
+                          AppButton(
+                            text: "Sign up",
+                            onTap: (){
+                              Get.toNamed(AppRoutes.assessmentNumberOneScreen);
+                            },
+                          ),
 
                           SizedBox(height: MediaQuery.of(context).size.height * 0.040),
 
