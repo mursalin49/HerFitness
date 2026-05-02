@@ -44,7 +44,7 @@ class AssessmentNumberThreeScreen extends StatelessWidget {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.045),
 
-                const AssessmentAppbar(title: "Assessment", stepText: "3 of 11"),
+                const AssessmentAppbar(title: "Assessment", stepText: "3 of 10"),
 
                 SizedBox(height: 40.h),
 
@@ -108,7 +108,7 @@ class AssessmentNumberThreeScreen extends StatelessWidget {
                     text: "Continue",
                     showArrow: true,
                     onTap: () {
-                      // Navigate to next step
+                      Get.toNamed(AppRoutes.assessmentNumberFourScreen);
                     },
                   ),
                 ),

@@ -1,8 +1,17 @@
 import 'package:get/get.dart';
 import '../views/Feature/Auth/sign_in_screen.dart';
+import '../views/Feature/Member/BottomNav/member_bottom_nav_screen.dart';
 import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_one.dart';
 import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_three.dart';
 import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_two.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_four.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_five.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_six.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_seven.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_eight.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_nine.dart';
+import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_ten.dart';
+import '../views/Feature/Member/MyClasses/my_classes_screen.dart';
 import '../views/Feature/SplashScreen/splash_screen.dart';
 import '../views/Feature/Auth/Welcome/welcome_screen.dart';
 import '../views/Feature/Auth/role_selection_screen.dart';
@@ -54,6 +63,15 @@ class AppRoutes{
   static String assessmentNumberOneScreen ="/assessment_number_one";
   static String assessmentNumberTwoScreen ="/assessment_number_two";
   static String assessmentNumberThreeScreen ="/assessment_number_three";
+  static String assessmentNumberFourScreen ="/assessment_number_four";
+  static String assessmentNumberFiveScreen ="/assessment_number_five";
+  static String assessmentNumberSixScreen ="/assessment_number_six";
+  static String assessmentNumberSevenScreen ="/assessment_number_seven";
+  static String assessmentNumberEightScreen ="/assessment_number_eight";
+  static String assessmentNumberNineScreen ="/assessment_number_nine";
+  static String assessmentNumberTenScreen ="/assessment_number_ten";
+  static String myClassesScreen ="/my_classes_screen";
+  static String memberBottomNavScreen ="/member_bottom_nav_screen";
 
 
 
@@ -84,6 +102,15 @@ class AppRoutes{
     GetPage(name: assessmentNumberOneScreen, page: ()=> AssessmentNumberOneScreen()),
     GetPage(name: assessmentNumberTwoScreen, page: ()=> AssessmentNumberTwoScreen()),
     GetPage(name: assessmentNumberThreeScreen, page: ()=> AssessmentNumberThreeScreen()),
+    GetPage(name: assessmentNumberFourScreen, page: ()=> AssessmentNumberFourScreen()),
+    GetPage(name: assessmentNumberFiveScreen, page: ()=> AssessmentNumberFiveScreen()),
+    GetPage(name: assessmentNumberSixScreen, page: ()=> AssessmentNumberSixScreen()),
+    GetPage(name: assessmentNumberSevenScreen, page: ()=> AssessmentNumberSevenScreen()),
+    GetPage(name: assessmentNumberEightScreen, page: ()=> AssessmentNumberEightScreen()),
+    GetPage(name: assessmentNumberNineScreen, page: ()=> AssessmentNumberNineScreen()),
+    GetPage(name: assessmentNumberTenScreen, page: ()=> AssessmentNumberTenScreen()),
+    GetPage(name: myClassesScreen, page: ()=> MemberMyClassesScreen()),
+    GetPage(name: memberBottomNavScreen, page: ()=> MemberBottomNavScreen()),
 
 
   ];

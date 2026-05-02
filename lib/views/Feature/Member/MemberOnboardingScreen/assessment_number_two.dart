@@ -22,9 +22,9 @@ class _AssessmentNumberTwoScreenState extends State<AssessmentNumberTwoScreen> {
   @override
   void initState() {
     super.initState();
-    // Use the same itemWidth and step as in the builder and listener
-    double itemWidth = 8.w;
-    double initialWeight = 128.0;
+    // Use a consistent itemWidth for both the listener and the UI
+    double itemWidth = 15.w;
+    double initialWeight = controller.weight.value;
     double initialOffset = (initialWeight - 20) / 0.2 * itemWidth;
     
     scrollController = ScrollController(initialScrollOffset: initialOffset);
@@ -86,7 +86,7 @@ class _AssessmentNumberTwoScreenState extends State<AssessmentNumberTwoScreen> {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.045),
 
-                const AssessmentAppbar(title: "Assessment", stepText: "2 of 11"),
+                const AssessmentAppbar(title: "Assessment", stepText: "2 of 10"),
 
                 SizedBox(height: 40.h),
 
@@ -152,7 +152,7 @@ class _AssessmentNumberTwoScreenState extends State<AssessmentNumberTwoScreen> {
                         children: [
                           ListView.builder(
                             controller: scrollController,
-                            padding: EdgeInsets.symmetric(horizontal: centerX - 4.w),
+                            padding: EdgeInsets.symmetric(horizontal: centerX - 7.5.w),
                             scrollDirection: Axis.horizontal,
                             itemCount: 1401, // (300 - 20) / 0.2 + 1
                             itemBuilder: (context, index) {

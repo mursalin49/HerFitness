@@ -53,7 +53,7 @@ class AssessmentNumberOneScreen extends StatelessWidget {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.045),
 
-                const AssessmentAppbar(title: "Assessment", stepText: "1 of 11"),
+                const AssessmentAppbar(title: "Assessment", stepText: "1 of 10"),
 
                 SizedBox(height: 40.h),
 
