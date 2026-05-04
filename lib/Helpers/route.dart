@@ -12,6 +12,11 @@ import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_eight.d
 import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_nine.dart';
 import '../views/Feature/Member/MemberOnboardingScreen/assessment_number_ten.dart';
 import '../views/Feature/Member/MyClasses/my_classes_screen.dart';
+import '../views/Feature/Member/Profile/member_profile_screen.dart';
+import '../views/Feature/Member/Trainer/trainer_list_screen.dart';
+import '../views/Feature/Member/Trainer/trainer_details_screen.dart';
+import '../views/Feature/Member/Trainer/trainer_reviews_screen.dart';
+import '../views/Feature/Member/Trainer/book_trainer_screen.dart';
 import '../views/Feature/SplashScreen/splash_screen.dart';
 import '../views/Feature/Auth/Welcome/welcome_screen.dart';
 import '../views/Feature/Auth/role_selection_screen.dart';
@@ -72,6 +77,11 @@ class AppRoutes{
   static String assessmentNumberTenScreen ="/assessment_number_ten";
   static String myClassesScreen ="/my_classes_screen";
   static String memberBottomNavScreen ="/member_bottom_nav_screen";
+  static String trainerListScreen ="/trainer_list_screen";
+  static String trainerDetailsScreen ="/trainer_details_screen";
+  static String trainerReviewsScreen ="/trainer_reviews_screen";
+  static String bookTrainerScreen ="/book_trainer_screen";
+  static String memberProfileScreen ="/member_profile_screen";
 
 
 
@@ -111,6 +121,11 @@ class AppRoutes{
     GetPage(name: assessmentNumberTenScreen, page: ()=> AssessmentNumberTenScreen()),
     GetPage(name: myClassesScreen, page: ()=> MemberMyClassesScreen()),
     GetPage(name: memberBottomNavScreen, page: ()=> MemberBottomNavScreen()),
+    GetPage(name: trainerListScreen, page: ()=> TrainerListScreen()),
+    GetPage(name: trainerDetailsScreen, page: ()=> TrainerDetailsScreen()),
+    GetPage(name: trainerReviewsScreen, page: ()=> const TrainerReviewsScreen()),
+    GetPage(name: bookTrainerScreen, page: ()=> const BookTrainerScreen()),
+    GetPage(name: memberProfileScreen, page: ()=> const MemberProfileScreen()),
 
 
   ];

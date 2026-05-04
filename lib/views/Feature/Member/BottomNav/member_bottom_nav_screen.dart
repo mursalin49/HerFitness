@@ -1,9 +1,12 @@
+import 'package:fitness/views/Feature/Member/Trainer/trainer_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:fitness/views/Feature/Member/Home/member_home_screen.dart';
 import 'package:fitness/views/Feature/Member/MyClasses/my_classes_screen.dart';
+import 'package:fitness/views/Feature/common/chat/messages_list_screen.dart';
 import '../../../../utils/AppColor/app_colors.dart';
+import '../Profile/member_profile_screen.dart';
 
 
 class MemberBottomNavScreen extends StatefulWidget {
@@ -45,10 +48,10 @@ class _MemberBottomNavScreenState extends State<MemberBottomNavScreen> {
   // Finalized pages for navigation
   final List<Widget> _pages = [
     MemberHomeScreen(),
-    const Scaffold(body: Center(child: Text("Find Trainer & booking"))),
+    TrainerListScreen(),
     MemberMyClassesScreen(),
-    const Scaffold(body: Center(child: Text("Groups"))),
-    const Scaffold(body: Center(child: Text("Profile"))),
+    const MessagesListScreen(),
+    const MemberProfileScreen(),
   ];
 
   @override
@@ -72,9 +75,9 @@ class _MemberBottomNavScreenState extends State<MemberBottomNavScreen> {
             borderRadius: BorderRadius.circular(35),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 20,
-                spreadRadius: 2,
+                color: Colors.black.withOpacity(0.19),
+                blurRadius: 50,
+                spreadRadius: 4,
                 offset: const Offset(0, 10),
               ),
             ],
@@ -94,7 +97,7 @@ class _MemberBottomNavScreenState extends State<MemberBottomNavScreen> {
                     _buildNavItem(icon: Icons.home_filled, index: 0),
                     _buildNavItem(icon: Icons.fitness_center_rounded, index: 1),
                     SizedBox(width: 48.w),
-                    _buildNavItem(icon: Icons.people_rounded, index: 3),
+                    _buildNavItem(icon: Icons.chat_bubble_rounded, index: 3),
                     _buildNavItem(icon: Icons.person_rounded, index: 4),
                   ],
                 ),

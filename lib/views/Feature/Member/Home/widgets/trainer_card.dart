@@ -9,6 +9,8 @@ class TrainerCard extends StatelessWidget {
   final double rating;
   final String price;
   final String imageUrl;
+  final String? distance;
+  final int? reviewCount;
   final VoidCallback? onTap;
 
   const TrainerCard({
@@ -18,6 +20,8 @@ class TrainerCard extends StatelessWidget {
     required this.rating,
     required this.price,
     required this.imageUrl,
+    this.distance,
+    this.reviewCount,
     this.onTap,
   });
 
@@ -26,58 +30,117 @@ class TrainerCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.all(12.w),
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.bgTertiary,
+          color: AppColors.bgPrimary,
           borderRadius: BorderRadius.circular(24.r),
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16.r),
-              child: Image.network(
-                imageUrl,
-                height: 70.h,
-                width: 75.w,
-                fit: BoxFit.cover,
-              ),
+          border: Border.all(color: Color(0xFFE4E4E7), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.10),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: AppTextStyles.base16Bold.copyWith(color: AppColors.textPrimary),
-                  ),
-                  Text(
-                    expertise,
-                    style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
-                  ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Icon(Icons.star, size: 14.sp, color: Colors.amber),
-                      SizedBox(width: 4.w),
-                      Text(
-                        "$rating",
-                        style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
-                      ),
-                      SizedBox(width: 12.w),
-                      Text(
-                        price,
-                        style: AppTextStyles.sm14Bold.copyWith(color: AppColors.textPrimary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, size: 16.sp, color: AppColors.textPrimary),
-            SizedBox(width: 8.w),
           ],
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Image
+              Container(
+                padding: EdgeInsets.all(2.r),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.borderSecondary, width: 1),
+                ),
+                child: CircleAvatar(
+                  radius: 24.r,
+                  backgroundImage: NetworkImage(imageUrl),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              // Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: AppTextStyles.base16Medium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      price,
+                      style: AppTextStyles.sm14Medium.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 15.sp,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      children: [
+                        Icon(Icons.monitor_heart_outlined, size: 18.sp, color: AppColors.textTertiary),
+                        SizedBox(width: 6.w),
+                        Text(
+                          expertise,
+                          style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+                        ),
+                        if (distance != null) ...[
+                          SizedBox(width: 8.w),
+                          Container(
+                            width: 4.w,
+                            height: 4.w,
+                            decoration: const BoxDecoration(
+                              color: AppColors.borderPrimary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Icon(Icons.location_on, size: 18.sp, color: AppColors.textTertiary),
+                          SizedBox(width: 4.w),
+                          Text(
+                            distance!,
+                            style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+                          ),
+                        ],
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      children: [
+                        ...List.generate(5, (index) {
+                          double starValue = index + 1;
+                          if (rating >= starValue) {
+                            return Icon(Icons.star, size: 18.sp, color: Colors.orange);
+                          } else if (rating >= starValue - 0.5) {
+                            return Icon(Icons.star_half, size: 18.sp, color: Colors.orange);
+                          } else {
+                            return Icon(Icons.star_border, size: 18.sp, color: Colors.orange);
+                          }
+                        }),
+                        SizedBox(width: 8.w),
+                        Text(
+                          "$rating",
+                          style: AppTextStyles.sm14Bold.copyWith(color: AppColors.textPrimary),
+                        ),
+                        if (reviewCount != null) ...[
+                          SizedBox(width: 4.w),
+                          Text(
+                            "($reviewCount)",
+                            style: AppTextStyles.sm14Regular.copyWith(color: AppColors.textTertiary),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

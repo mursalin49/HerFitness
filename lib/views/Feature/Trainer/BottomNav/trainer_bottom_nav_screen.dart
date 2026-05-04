@@ -6,6 +6,7 @@ import '../Home/trainer_home_screen.dart';
 import '../Schedule/schedule_screen.dart';
 import '../Classes/my_classes_screen.dart';
 import '../Profile/trainer_profile_screen.dart';
+import '../../common/chat/messages_list_screen.dart';
 
 class TrainerBottomNavScreen extends StatefulWidget {
   final int initialIndex;
@@ -48,7 +49,7 @@ class _TrainerBottomNavScreenState extends State<TrainerBottomNavScreen> {
     const TrainerHomeScreen(),
     MyClassesScreen(),
     const ScheduleScreen(),
-    const Scaffold(body: Center(child: Text("Groups"))),
+    const MessagesListScreen(),
     const TrainerProfileScreen(),
   ];
 
@@ -95,7 +96,7 @@ class _TrainerBottomNavScreenState extends State<TrainerBottomNavScreen> {
                     _buildNavItem(icon: Icons.home_filled, index: 0),
                     _buildNavItem(icon: Icons.fitness_center_rounded, index: 1),
                     SizedBox(width: 48.w),
-                    _buildNavItem(icon: Icons.people_rounded, index: 3),
+                    _buildNavItem(icon: Icons.chat_bubble_rounded, index: 3),
                     _buildNavItem(icon: Icons.person_rounded, index: 4),
                   ],
                 ),
