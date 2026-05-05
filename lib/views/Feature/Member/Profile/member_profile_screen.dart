@@ -126,7 +126,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                 _HeaderCircleButton(icon: Icons.arrow_back_ios_new_rounded, onTap: () => Get.back()),
                 _HeaderCircleButton(
                   icon: Icons.settings_outlined,
-                  onTap: () => Get.toNamed(AppRoutes.accountSettingsScreen),
+                  onTap: () => Get.toNamed(AppRoutes.memberAccountSettingsScreen),
                 ),
               ],
             ),

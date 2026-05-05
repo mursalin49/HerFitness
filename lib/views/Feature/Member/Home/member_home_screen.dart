@@ -30,11 +30,7 @@ class MemberHomeScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
               child: Column(
                 children: [
-                  _buildSearchBar(),
-                  SizedBox(height: 20.h),
                   _buildCategories(),
-                  SizedBox(height: 24.h),
-                  _buildBanner(),
                   SizedBox(height: 32.h),
                   _buildSectionHeader("My Next Workouts", () {}),
                   SizedBox(height: 16.h),
@@ -43,7 +39,7 @@ class MemberHomeScreen extends StatelessWidget {
                   _buildSectionHeader("Nearby Trainer", () => Get.toNamed(AppRoutes.trainerListScreen)),
                   SizedBox(height: 16.h),
                   _buildTrainerList(),
-                  SizedBox(height: 120.h),
+                  SizedBox(height: 130.h),
                 ],
               ),
             ),
@@ -127,31 +123,6 @@ class MemberHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "Search gym, trainers, classess...",
-          hintStyle: AppTextStyles.sm14Regular.copyWith(color: AppColors.textDisabled),
-          border: InputBorder.none,
-          suffixIcon: Icon(Icons.search, color: AppColors.textPrimary, size: 24.sp),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCategories() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -183,91 +154,13 @@ class MemberHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBanner() {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: 180.h,
-          child: PageView.builder(
-            controller: controller.bannerPageController,
-            onPageChanged: (index) => controller.bannerIndex.value = index,
-            itemBuilder: (context, index) {
-              final banner = controller.banners[index % controller.banners.length];
-              return Container(
-                margin: EdgeInsets.symmetric(horizontal: 4.w),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.r),
-                  image: DecorationImage(
-                    image: NetworkImage(banner["image"]!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Container(
-                  padding: EdgeInsets.all(24.w),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24.r),
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomRight,
-                      end: Alignment.topLeft,
-                      colors: [
-                        Colors.black.withOpacity(0.7),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                  alignment: Alignment.bottomLeft,
-                  child: Text(
-                    banner["title"]!,
-                    style: AppTextStyles.base16Bold.copyWith(
-                      color: Colors.white,
-                      fontSize: 20.sp,
-                      height: 1.2,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        SizedBox(height: 12.h),
-        Obx(() {
-          int currentIndex = controller.bannerIndex.value % controller.banners.length;
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              controller.banners.length,
-              (index) => AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: EdgeInsets.symmetric(horizontal: 4.w),
-                width: currentIndex == index ? 24.w : 8.w,
-                height: 8.h,
-                decoration: BoxDecoration(
-                  color: currentIndex == index
-                      ? AppColors.actionPrimary
-                      : AppColors.borderPrimary,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-            ),
-          );
-        }),
-      ],
-    );
-  }
+
 
   Widget _buildSectionHeader(String title, VoidCallback onTap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: AppTextStyles.lg18Bold.copyWith(color: AppColors.textPrimary)),
-        GestureDetector(
-          onTap: onTap,
-          child: Text(
-            "View all",
-            style: AppTextStyles.sm14Medium.copyWith(color: AppColors.actionPrimary),
-          ),
-        ),
       ],
     );
   }

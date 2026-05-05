@@ -49,16 +49,15 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
-      body: Column(
-        children: [
-          _buildHeader(context),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 30),
 
                   _buildLabel("Full Name"),
                   CustomTextField(
@@ -119,36 +118,52 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   SizedBox(height: 16.h),
                   
                   _buildLabel("Do you host classes online or in person?"),
-                  DropdownButtonFormField<String>(
-                    value: _selectedHostMode,
-                    icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20.w),
-                    decoration: InputDecoration(
-                      hintText: "e.g. Online, In person, or Both",
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: AppColors.actionPrimary),
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      buttonTheme: ButtonTheme.of(context).copyWith(
+                        alignedDropdown: true,
                       ),
                     ),
-                    items: _hostModeOptions.map((String mode) {
-                      return DropdownMenuItem<String>(
-                        value: mode,
-                        child: AppText(mode, style: AppTextStyles.sm14Medium),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedHostMode = newValue;
-                      });
-                    },
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedHostMode,
+                      isExpanded: true,
+                      icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20.w, color: AppColors.textSecondary),
+                      style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+                      dropdownColor: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      decoration: InputDecoration(
+                        hintText: "Online, In person or Both",
+                        hintStyle: AppTextStyles.sm14Medium.copyWith(
+                          color: AppColors.textTertiary,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: AppColors.actionPrimary),
+                        ),
+                      ),
+                      items: _hostModeOptions.map((String mode) {
+                        return DropdownMenuItem<String>(
+                          value: mode,
+                          child: AppText(mode, style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary)),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedHostMode = newValue;
+                        });
+                      },
+                    ),
                   ),
                   SizedBox(height: 16.h),
                   
@@ -168,26 +183,23 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
     return SizedBox(
-      height: 160.h,
+      height: 230.h,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // 1. Pink Background
           Container(
+            height: 160.h,
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(
-              20.w,
-              0,
-              20.w,
-              24.h,
-            ),
+            padding: EdgeInsets.fromLTRB(20.w, MediaQuery.of(context).padding.top + 10.h, 20.w, 0),
             decoration: BoxDecoration(
               color: AppColors.actionPrimary,
               borderRadius: BorderRadius.only(
@@ -196,6 +208,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               ),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
                   onTap: () => Get.back(),
@@ -212,10 +225,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   ),
                 ),
                 Expanded(
-                  child: Center(
-                    child: AppText(
-                      "Personal Info",
-                      style: AppTextStyles.base16SemiBold.copyWith(color: Colors.white, fontSize: 20.sp),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 10.h),
+                    child: Center(
+                      child: AppText(
+                        "Personal Info",
+                        style: AppTextStyles.base16SemiBold.copyWith(color: Colors.white, fontSize: 20.sp),
+                      ),
                     ),
                   ),
                 ),
@@ -223,62 +239,71 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               ],
             ),
           ),
+          // 2. Profile Image
           Positioned(
-            bottom: -50.h,
+            bottom: 20.h,
             left: 0,
             right: 0,
             child: Center(
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 87.w,
-                    height: 80.w,
+              child: Container(
+                width: 87.w,
+                height: 80.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24.r),
+                  image: const DecorationImage(
+                    image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
+                    fit: BoxFit.cover,
+                  ),
+                  border: Border.all(color: Colors.white, width: 2.w),
+                ),
+              ),
+            ),
+          ),
+          // 3. Edit Icon
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Get.snackbar(
+                    "Edit Image",
+                    "Image edit clicked!",
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.black87,
+                    colorText: Colors.white,
+                    margin: EdgeInsets.all(16),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(3.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24.r),
-                      image: const DecorationImage(
-                        image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                        fit: BoxFit.cover,
-                      ),
-                      border: Border.all(color: Colors.white, width: 2.w),
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: SvgPicture.asset(
+                      "assets/icons/editIcon.svg",
+                      color: Colors.white,
+                      width: 18.w,
+                      height: 18.w,
                     ),
                   ),
-                  Positioned(
-                    bottom: -20.h,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: EdgeInsets.all(3.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.all(8.w),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: SvgPicture.asset(
-                            "assets/icons/editIcon.svg",
-                            color: Colors.white,
-                            width: 18.w,
-                            height: 18.w,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
