@@ -13,7 +13,10 @@ import 'package:latlong2/latlong.dart';
 class TrainerDetailsScreen extends StatelessWidget {
   TrainerDetailsScreen({super.key});
 
-  final TrainerDetailsController controller = Get.put(TrainerDetailsController());
+  final TrainerDetailsController controller =
+      Get.isRegistered<TrainerDetailsController>()
+      ? Get.find<TrainerDetailsController>()
+      : Get.put(TrainerDetailsController());
 
   @override
   Widget build(BuildContext context) {
@@ -47,88 +50,107 @@ class TrainerDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildHeaderImage() {
-    return Stack(
-      children: [
-        Container(
-          height: 400.h,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
-            image: const DecorationImage(
-              image: NetworkImage("https://images.unsplash.com/photo-1518611012118-29a88f5573ce?q=80&w=800&auto=format&fit=crop"),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        // Overlay Gradient for text readability
-        Positioned.fill(
-          child: Container(
+    return Obx(() {
+      final trainer = controller.trainer.value ?? const <String, dynamic>{};
+      final imageUrl = trainer['imageUrl']?.toString();
+      final displayImage = imageUrl != null && imageUrl.isNotEmpty
+          ? imageUrl
+          : "https://images.unsplash.com/photo-1518611012118-29a88f5573ce?q=80&w=800&auto=format&fit=crop";
+      final name = trainer['name']?.toString() ?? 'Trainer';
+      final price = trainer['price']?.toString() ?? 'Price unavailable';
+      final expertise = trainer['expertise']?.toString() ?? 'Fitness Trainer';
+      final distance = trainer['distance']?.toString();
+
+      return Stack(
+        children: [
+          Container(
+            height: 400.h,
+            width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.2),
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.6),
-                ],
-                stops: const [0.0, 0.5, 1.0],
+              image: DecorationImage(
+                image: NetworkImage(displayImage),
+                fit: BoxFit.cover,
               ),
             ),
           ),
-        ),
-        // Top Buttons
-        SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-            child: CustomAppbar()
-          ),
-        ),
-        // Bottom Text Info
-        Positioned(
-          left: 20.w,
-          right: 20.w,
-          bottom: 30.h,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Seraphina Dubois",
-                style: AppTextStyles.base16Medium.copyWith(color: Colors.white, fontSize: 26.sp),
+          // Overlay Gradient for text readability
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.2),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.6),
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
               ),
-              SizedBox(height: 8.h),
-              Text(
-                "\$100 - \$250/session",
-                style: AppTextStyles.base16Medium.copyWith(color: Colors.white.withValues(alpha: 0.9)),
-              ),
-              SizedBox(height: 12.h),
-              Row(
-                children: [
-                  _buildSmallTag(Icons.radar, "Yoga & Pilates"),
-                  SizedBox(width: 16.w),
-                  _buildSmallTag(Icons.location_on, "500m"),
-                ],
-              ),
-            ],
-          ),
-        ),
-        // Message Button
-        Positioned(
-          right: 20.w,
-          bottom: 30.h,
-          child: Container(
-            width: 56.w,
-            height: 56.w,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
             ),
-            child: Icon(Icons.chat_bubble, color: Colors.black, size: 24.sp),
           ),
-        ),
-      ],
-    );
+          // Top Buttons
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              child: CustomAppbar(),
+            ),
+          ),
+          // Bottom Text Info
+          Positioned(
+            left: 20.w,
+            right: 20.w,
+            bottom: 30.h,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: AppTextStyles.base16Medium.copyWith(
+                    color: Colors.white,
+                    fontSize: 26.sp,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  price,
+                  style: AppTextStyles.base16Medium.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    _buildSmallTag(Icons.radar, expertise),
+                    if (distance != null && distance.isNotEmpty) ...[
+                      SizedBox(width: 16.w),
+                      _buildSmallTag(Icons.location_on, distance),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Message Button
+          Positioned(
+            right: 20.w,
+            bottom: 30.h,
+            child: Container(
+              width: 56.w,
+              height: 56.w,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.chat_bubble, color: Colors.black, size: 24.sp),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildCircleButton(IconData icon, VoidCallback onTap) {
@@ -316,67 +338,85 @@ class TrainerDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildBioSection() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Personal Bio", style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary)),
-          SizedBox(height: 12.h),
-          Text(
-            "I've been practicing my glutes with coach Seraphina Dubois for the past week, and I feel better! The personalized recommendation is simply a beast!! I've been practicing my glutes with coach Seraphina Dubois for the past week, and I feel better!",
-            style: AppTextStyles.sm14Regular.copyWith(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
-    );
+    return Obx(() {
+      final trainer = controller.trainer.value ?? const <String, dynamic>{};
+      final bio = trainer['bio']?.toString();
+
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Personal Bio", style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary)),
+            SizedBox(height: 12.h),
+            Text(
+              bio != null && bio.isNotEmpty
+                  ? bio
+                  : "No personal bio added yet.",
+              style: AppTextStyles.sm14Regular.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildLocationSection() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Location", style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary)),
-          SizedBox(height: 12.h),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24.r),
-            child: SizedBox(
-              height: 200.h,
-              width: double.infinity,
-              child: FlutterMap(
-                options: MapOptions(
-                  initialCenter: LatLng(23.8103, 90.4125),
-                  initialZoom: 13.0,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-                    subdomains: const ['a', 'b', 'c', 'd'],
-                    userAgentPackageName: 'com.sparktech.herfitness',
+    return Obx(() {
+      final trainer = controller.trainer.value ?? const <String, dynamic>{};
+      final lat = trainer['lat'] is num
+          ? (trainer['lat'] as num).toDouble()
+          : 23.8103;
+      final lng = trainer['lng'] is num
+          ? (trainer['lng'] as num).toDouble()
+          : 90.4125;
+      final point = LatLng(lat, lng);
+
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Location", style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary)),
+            SizedBox(height: 12.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24.r),
+              child: SizedBox(
+                height: 200.h,
+                width: double.infinity,
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter: point,
+                    initialZoom: 13.0,
                   ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: LatLng(23.8103, 90.4125),
-                        width: 40.w,
-                        height: 40.w,
-                        child: Icon(
-                          Icons.location_on,
-                          color: AppColors.actionPrimary,
-                          size: 40.sp,
+                  children: [
+                    TileLayer(
+                      urlTemplate: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+                      subdomains: const ['a', 'b', 'c', 'd'],
+                      userAgentPackageName: 'com.sparktech.herfitness',
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: point,
+                          width: 40.w,
+                          height: 40.w,
+                          child: Icon(
+                            Icons.location_on,
+                            color: AppColors.actionPrimary,
+                            size: 40.sp,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildBottomButton() {
@@ -395,7 +435,10 @@ class TrainerDetailsScreen extends StatelessWidget {
           ],
         ),
         child: GestureDetector(
-          onTap: () => Get.toNamed(AppRoutes.bookTrainerScreen),
+          onTap: () => Get.toNamed(
+            AppRoutes.bookTrainerScreen,
+            arguments: {'trainer': controller.trainer.value},
+          ),
           child: Container(
             width: double.infinity,
             height: 56.h,

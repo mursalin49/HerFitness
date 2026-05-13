@@ -1,3 +1,4 @@
+import 'package:fitness/controllers/trainer/trainer_profile_controller.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -46,19 +47,26 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final TrainerProfileController profileController =
+        Get.isRegistered<TrainerProfileController>()
+        ? Get.find<TrainerProfileController>()
+        : Get.put(TrainerProfileController());
+
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
-      body: SingleChildScrollView(
+      body: Obx(() => SingleChildScrollView(
         child: Column(
           children: [
-            _buildHeader(context),
+            _buildHeader(context, profileController.profileImageUrl),
+            if (profileController.isLoading.value)
+              LinearProgressIndicator(color: AppColors.actionPrimary),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 children: [
                   SizedBox(height: 12.h),
                   AppText(
-                    "Seraphina Dubois",
+                    profileController.displayName,
                     style: AppTextStyles.xl20SemiBold.copyWith(color: AppColors.textPrimary),
                   ),
                   SizedBox(height: 8.h),
@@ -68,7 +76,7 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
                       Icon(Icons.location_on_outlined, size: 18, color: AppColors.textSecondary),
                       SizedBox(width: 4.w),
                       AppText(
-                        "Syracuse, Connecticut",
+                        profileController.displayLocation,
                         style: AppTextStyles.sm14Medium.copyWith(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w400,
@@ -140,11 +148,11 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, String imageUrl) {
     return SizedBox(
       height: 235.h,
       child: Stack(
@@ -187,11 +195,20 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(color: Colors.white, width: 4),
-                image: const DecorationImage(
-                  image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                  fit: BoxFit.cover,
-                ),
+                image: imageUrl.isEmpty
+                    ? null
+                    : DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.cover,
+                      ),
               ),
+              child: imageUrl.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      color: AppColors.textSecondary,
+                      size: 40.w,
+                    )
+                  : null,
             ),
           ),
         ],

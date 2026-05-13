@@ -1,3 +1,4 @@
+import 'package:fitness/controllers/auth/password_recovery_controller.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppButton/appButton.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -7,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../utils/AppColor/app_colors.dart';
-import 'package:fitness/Helpers/route.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -17,27 +17,31 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
-  
+  late final PasswordRecoveryController recoveryController;
+
   int strengthLevel = 0;
 
   @override
   void initState() {
     super.initState();
-    newPasswordController.addListener(_checkPasswordStrength);
+    recoveryController = Get.isRegistered<PasswordRecoveryController>()
+        ? Get.find<PasswordRecoveryController>()
+        : Get.put(PasswordRecoveryController());
+    recoveryController.newPasswordController.addListener(
+      _checkPasswordStrength,
+    );
   }
 
   @override
   void dispose() {
-    newPasswordController.removeListener(_checkPasswordStrength);
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
+    recoveryController.newPasswordController.removeListener(
+      _checkPasswordStrength,
+    );
     super.dispose();
   }
 
   void _checkPasswordStrength() {
-    String text = newPasswordController.text;
+    String text = recoveryController.newPasswordController.text;
     if (text.isEmpty) {
       if (strengthLevel != 0) setState(() => strengthLevel = 0);
     } else if (text.length <= 3) {
@@ -96,7 +100,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               color: const Color(0xFF6B7280),
             ),
           ),
-        ]
+        ],
       ],
     );
   }
@@ -126,8 +130,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 center: const Alignment(1.0, -1.0),
                 radius: 2.5,
                 colors: [
-                  const Color(0xFFFFA6B4).withOpacity(0.5),
-                  const Color(0xFFFFE0B9).withOpacity(0.25),
+                  const Color(0xFFFFA6B4).withValues(alpha: 0.5),
+                  const Color(0xFFFFE0B9).withValues(alpha: 0.25),
                   Colors.white,
                 ],
                 stops: const [0.0, 0.7, 1.0],
@@ -144,7 +148,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   child: const CustomAppbar(title: "Change Password"),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.09),
-                
+
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Column(
@@ -160,13 +164,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       CustomTextField(
                         hintText: "******",
                         prefixIcon: "assets/icons/lock.svg",
-                        controller: newPasswordController,
+                        controller: recoveryController.newPasswordController,
                         filColor: Colors.white,
                         borderColor: Colors.grey.shade300,
                         isPassword: true,
                       ),
                       SizedBox(height: 24.h),
-                      
+
                       AppText(
                         "Confirm Password",
                         style: AppTextStyles.base16Medium.copyWith(
@@ -177,21 +181,28 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       CustomTextField(
                         hintText: "******",
                         prefixIcon: "assets/icons/lock.svg",
-                        controller: confirmPasswordController,
+                        controller:
+                            recoveryController.confirmPasswordController,
                         filColor: Colors.white,
                         borderColor: Colors.grey.shade300,
                         isPassword: true,
                       ),
                       SizedBox(height: 16.h),
-                      
+
                       _buildStrengthBars(),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.045),
-                      AppButton(
-                        text: "Save Changes",
-                        onTap: () {
-                         Get.toNamed(AppRoutes.signInScreen);
-                        },
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.045,
+                      ),
+                      Obx(
+                        () => AppButton(
+                          text: "Save Changes",
+                          isLoading:
+                              recoveryController.isResettingPassword.value,
+                          onTap: recoveryController.isResettingPassword.value
+                              ? () {}
+                              : recoveryController.resetPassword,
+                        ),
                       ),
                     ],
                   ),

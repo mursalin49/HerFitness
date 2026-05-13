@@ -1,5 +1,7 @@
 import 'package:fitness/Helpers/route.dart';
 import 'package:fitness/controllers/my_classes_controller.dart';
+import 'package:fitness/controllers/trainer/trainer_location_controller.dart';
+import 'package:fitness/controllers/trainer/trainer_profile_controller.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -28,12 +30,20 @@ class TrainerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Ensure the controller is available
     final MyClassesController classesController = Get.isRegistered<MyClassesController>() ? Get.find<MyClassesController>() : Get.put(MyClassesController());
+    final TrainerProfileController profileController =
+        Get.isRegistered<TrainerProfileController>()
+        ? Get.find<TrainerProfileController>()
+        : Get.put(TrainerProfileController());
+    final TrainerLocationController locationController =
+        Get.isRegistered<TrainerLocationController>()
+        ? Get.find<TrainerLocationController>()
+        : Get.put(TrainerLocationController());
 
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
       body: Column(
         children: [
-          _buildHeader(context),
+          _buildHeader(context, profileController, locationController),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
@@ -93,6 +103,18 @@ class TrainerHomeScreen extends StatelessWidget {
 
                   // Reactive display of only the first class
                   Obx(() {
+                    if (classesController.isLoading.value &&
+                        classesController.classes.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          child: CircularProgressIndicator(
+                            color: AppColors.actionPrimary,
+                          ),
+                        ),
+                      );
+                    }
+
                     if (classesController.classes.isEmpty) {
                       return Center(
                         child: Padding(
@@ -133,19 +155,48 @@ class TrainerHomeScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20.h),
                   
-                  const TimelineScheduleCard(
-                    time: "08:00",
-                    title: "Back Workout",
-                    date: "10-04-2026",
-                    icon: Icons.fitness_center_rounded,
-                  ),
-                  const TimelineScheduleCard(
-                    time: "10:30",
-                    title: "Yoga Flow",
-                    date: "10-04-2026",
-                    icon: Icons.self_improvement_rounded,
-                    isLast: true,
-                  ),
+                  Obx(() {
+                    final scheduleItems = classesController.classes.take(2).toList();
+
+                    if (classesController.isLoading.value &&
+                        scheduleItems.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          child: CircularProgressIndicator(
+                            color: AppColors.actionPrimary,
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (scheduleItems.isEmpty) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20.h),
+                        child: Center(
+                          child: AppText(
+                            "No schedule available",
+                            style: AppTextStyles.sm14Medium.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: List.generate(scheduleItems.length, (index) {
+                        final item = scheduleItems[index];
+                        return TimelineScheduleCard(
+                          time: item["time"]?.toString() ?? "N/A",
+                          title: item["title"]?.toString() ?? "Class",
+                          date: item["date"]?.toString() ?? "",
+                          icon: Icons.fitness_center_rounded,
+                          isLast: index == scheduleItems.length - 1,
+                        );
+                      }),
+                    );
+                  }),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.15),
                 ],
               ),
@@ -156,77 +207,140 @@ class TrainerHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20.w, MediaQuery.of(context).padding.top + 16.h, 20.w, 24.h,),
-      decoration: BoxDecoration(
-        color: AppColors.actionPrimary,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32.r),
-          bottomRight: Radius.circular(32.r),
+  Widget _buildHeader(
+    BuildContext context,
+    TrainerProfileController profileController,
+    TrainerLocationController locationController,
+  ) {
+    return Obx(() {
+      final imageUrl = profileController.profileImageUrl;
+
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          20.w,
+          MediaQuery.of(context).padding.top + 16.h,
+          20.w,
+          24.h,
         ),
-      ),
-      child: Row(
-        children: [
-          // Profile Image
-          GestureDetector(
-            onTap: (){
-              Get.toNamed(AppRoutes.trainerProfileScreen);
-            },
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.2),
-                border: Border.all(color: Colors.white, width: 2),
-                image: const DecorationImage(
-                  image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                  fit: BoxFit.cover,
+        decoration: BoxDecoration(
+          color: AppColors.actionPrimary,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(32.r),
+            bottomRight: Radius.circular(32.r),
+          ),
+        ),
+        child: Row(
+          children: [
+            // Profile Image
+            GestureDetector(
+              onTap: () {
+                Get.toNamed(AppRoutes.trainerProfileScreen);
+              },
+              child: Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.2),
+                  border: Border.all(color: Colors.white, width: 2),
+                  image: imageUrl.isEmpty
+                      ? null
+                      : DecorationImage(
+                          image: NetworkImage(imageUrl),
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                child: imageUrl.isEmpty
+                    ? const Icon(Icons.person, color: Colors.white)
+                    : null,
+              ),
+            ),
+            SizedBox(width: 14.w),
+            // Greeting
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    "Welcome back",
+                    style: AppTextStyles.xs12Regular.copyWith(
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                  ),
+                  AppText(
+                    profileController.displayName,
+                    style: AppTextStyles.base16SemiBold.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildOnlineToggle(locationController),
+            SizedBox(width: 8.w),
+            // Notification Icon
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.notificationScreen),
+              child: Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.2),
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    "assets/icons/notificationIcon.svg",
+                    width: 24.w,
+                    height: 24.w,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 14.w),
-          // Greeting
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  "Welcome back",
-                  style: AppTextStyles.xs12Regular.copyWith(color: Colors.white.withOpacity(0.8)),
-                ),
-                AppText(
-                  "Alex Johnson",
-                  style: AppTextStyles.base16SemiBold.copyWith(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          // Notification Icon
-          GestureDetector(
-            onTap: () => Get.toNamed(AppRoutes.notificationScreen),
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.2),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  "assets/icons/notificationIcon.svg",
-                  width: 24.w,
-                  height: 24.w,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildOnlineToggle(TrainerLocationController locationController) {
+    return Obx(() {
+      if (locationController.isUpdating.value) {
+        return SizedBox(
+          width: 48.w,
+          height: 48.w,
+          child: Center(
+            child: SizedBox(
+              width: 22.w,
+              height: 22.w,
+              child: const CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
               ),
             ),
           ),
-        ],
-      ),
-    );
+        );
+      }
+
+      return Semantics(
+        label: 'Trainer online status',
+        child: Transform.scale(
+          scale: 0.82,
+          child: Switch.adaptive(
+            value: locationController.isOnline.value,
+            activeColor: Colors.white,
+            activeTrackColor: const Color(0xFF16A34A),
+            inactiveThumbColor: Colors.white,
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.35),
+            onChanged: locationController.toggleOnlineStatus,
+          ),
+        ),
+      );
+    });
   }
 }

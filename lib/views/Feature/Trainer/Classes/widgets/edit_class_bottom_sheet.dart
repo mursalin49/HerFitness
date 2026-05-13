@@ -1,4 +1,5 @@
 import 'package:fitness/controllers/my_classes_controller.dart';
+import 'package:fitness/models/trainer_class_model.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppButton/appButton.dart';
@@ -18,6 +19,7 @@ class EditClassBottomSheet extends StatefulWidget {
   final int initialMaxMembers;
   final String? initialClassType;
   final String initialSessionFormat;
+  final DateTime? initialDateTime;
 
   const EditClassBottomSheet({
     super.key,
@@ -29,6 +31,7 @@ class EditClassBottomSheet extends StatefulWidget {
     required this.initialMaxMembers,
     required this.initialClassType,
     required this.initialSessionFormat,
+    this.initialDateTime,
   });
 
   @override
@@ -64,6 +67,11 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
     );
     _selectedType   = _classTypes.contains(widget.initialClassType) ? widget.initialClassType : null;
     _selectedFormat = _sessionFormats.contains(widget.initialSessionFormat) ? widget.initialSessionFormat : null;
+
+    if (widget.initialDateTime != null) {
+      _selectedDateTime = widget.initialDateTime;
+      return;
+    }
 
     try {
       final parsed = DateFormat("hh:mm a").parse(widget.initialTime);
@@ -140,6 +148,91 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
   }
 
   bool get _isGroupFormat => _selectedFormat == "Group";
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final payload = _buildPayload();
+    if (payload == null) return;
+
+    final success = await controller.updateClass(widget.index, payload);
+    if (!success || !mounted) return;
+
+    Navigator.pop(context);
+  }
+
+  TrainerClassPayload? _buildPayload() {
+    final selectedDateTime = _selectedDateTime;
+    final duration = int.tryParse(_durationController.text.trim());
+    final price = double.tryParse(_priceController.text.trim());
+
+    if (selectedDateTime == null) {
+      _showValidationError('Please pick a date and time.');
+      return null;
+    }
+
+    if (_selectedType == null) {
+      _showValidationError('Please select a class type.');
+      return null;
+    }
+
+    if (_selectedFormat == null) {
+      _showValidationError('Please select a session format.');
+      return null;
+    }
+
+    if (duration == null || duration <= 0) {
+      _showValidationError('Please enter a valid duration.');
+      return null;
+    }
+
+    if (price == null || price < 0) {
+      _showValidationError('Please enter a valid price.');
+      return null;
+    }
+
+    final capacity = _isGroupFormat
+        ? int.tryParse(_capacityController.text.trim())
+        : 1;
+    if (capacity == null || capacity <= 0) {
+      _showValidationError('Please enter a valid capacity.');
+      return null;
+    }
+
+    final endDateTime = selectedDateTime.add(Duration(minutes: duration));
+
+    return TrainerClassPayload(
+      name: _nameController.text.trim(),
+      classType: _apiClassType(_selectedType!),
+      durationMinutes: duration,
+      pricePerMember: price,
+      sessionFormat: _apiSessionFormat(_selectedFormat!),
+      capacity: capacity,
+      availableSlots: [
+        AvailabilitySlotModel(
+          date: DateFormat('yyyy-MM-dd').format(selectedDateTime),
+          startTime: DateFormat('HH:mm').format(selectedDateTime),
+          endTime: DateFormat('HH:mm').format(endDateTime),
+        ),
+      ],
+    );
+  }
+
+  void _showValidationError(String message) {
+    Get.snackbar(
+      'Missing information',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
+  String _apiClassType(String value) {
+    return value.toLowerCase().contains('person') ? 'IN_PERSON' : 'ONLINE';
+  }
+
+  String _apiSessionFormat(String value) {
+    return value.toLowerCase().contains('group') ? 'GROUP' : 'PRIVATE';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,25 +412,12 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                       ),
                       SizedBox(height: 20.h),
                     ],
-                    AppButton(
-                      text: "Save Changes",
-                      onTap: () {
-                        if (_formKey.currentState!.validate()) {
-                          final updatedClass = {
-                            "title": _nameController.text,
-                            "time": _selectedDateTime != null 
-                                ? DateFormat("hh:mm a").format(_selectedDateTime!) 
-                                : "N/A",
-                            "duration": int.tryParse(_durationController.text) ?? 0,
-                            "price": double.tryParse(_priceController.text) ?? 0.0,
-                            "maxMembers": int.tryParse(_capacityController.text) ?? 0,
-                            "classType": _selectedType ?? "N/A",
-                            "sessionFormat": _selectedFormat ?? "N/A"
-                          };
-                          controller.updateClass(widget.index, updatedClass);
-                          Navigator.pop(context);
-                        }
-                      },
+                    Obx(
+                      () => AppButton(
+                        text: "Save Changes",
+                        isLoading: controller.isSaving.value,
+                        onTap: controller.isSaving.value ? () {} : _submit,
+                      ),
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.030),
                   ],

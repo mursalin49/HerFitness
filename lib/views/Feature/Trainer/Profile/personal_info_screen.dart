@@ -1,3 +1,6 @@
+import 'package:fitness/controllers/trainer/trainer_profile_controller.dart';
+import 'package:fitness/controllers/trainer/trainer_location_controller.dart';
+import 'package:fitness/models/user_profile_model.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -25,13 +28,35 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final TextEditingController _certController = TextEditingController();
   final TextEditingController _hostModeController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _latController = TextEditingController();
+  final TextEditingController _lngController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
   List<String> _teachClasses = ["Yoga", "Strength Training"];
   String? _selectedHostMode;
   final List<String> _hostModeOptions = ["Online", "In person", "Both"];
+  late final TrainerProfileController _profileController;
+  late final TrainerLocationController _trainerLocationController;
+  Worker? _profileWorker;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileController = Get.isRegistered<TrainerProfileController>()
+        ? Get.find<TrainerProfileController>()
+        : Get.put(TrainerProfileController());
+    _trainerLocationController = Get.isRegistered<TrainerLocationController>()
+        ? Get.find<TrainerLocationController>()
+        : Get.put(TrainerLocationController());
+    _profileWorker = ever<UserProfileModel?>(
+      _profileController.user,
+      _populateProfile,
+    );
+    _populateProfile(_profileController.user.value);
+  }
 
   @override
   void dispose() {
+    _profileWorker?.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -41,8 +66,46 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     _certController.dispose();
     _hostModeController.dispose();
     _locationController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
     _tagController.dispose();
     super.dispose();
+  }
+
+  void _populateProfile(UserProfileModel? user) {
+    if (user == null) return;
+
+    _nameController.text = user.displayName;
+    _emailController.text = user.email ?? '';
+    _phoneController.text = user.phoneNumber ?? '';
+    _stateController.text = user.state ?? '';
+    _locationController.text = user.location ?? '';
+    _bioController.text = user.bio ?? '';
+  }
+
+  Future<void> _saveBaseLocation() async {
+    final lat = double.tryParse(_latController.text.trim());
+    final lng = double.tryParse(_lngController.text.trim());
+
+    if (lat == null || lng == null) {
+      Get.snackbar(
+        'Invalid coordinates',
+        'Please enter valid latitude and longitude values.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      Get.snackbar(
+        'Invalid coordinates',
+        'Latitude must be -90 to 90 and longitude must be -180 to 180.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    await _trainerLocationController.setBaseLocation(lat: lat, lng: lng);
   }
 
   @override
@@ -173,10 +236,56 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     hintText: "Syracuse, Connecticut",
                     controller: _locationController,
                   ),
+                  SizedBox(height: 16.h),
+
+                  _buildLabel("Base Coordinates"),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          prefixIcon: Icon(Icons.pin_drop_outlined, size: 20.w),
+                          hintText: "Latitude",
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: true,
+                          ),
+                          controller: _latController,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: CustomTextField(
+                          prefixIcon: Icon(Icons.pin_drop, size: 20.w),
+                          hintText: "Longitude",
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: true,
+                          ),
+                          controller: _lngController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Obx(
+                    () => AppButton(
+                      onTap: _trainerLocationController.isUpdating.value
+                          ? () {}
+                          : _saveBaseLocation,
+                      text: "Save Base Location",
+                      isLoading: _trainerLocationController.isUpdating.value,
+                    ),
+                  ),
                   SizedBox(height: 32.h),
                   
                   AppButton(
-                    onTap: () {},
+                    onTap: () {
+                      Get.snackbar(
+                        'Profile update unavailable',
+                        'Profile updates are not available yet.',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    },
                     text: "Save Settings",
                   ),
                   SizedBox(height: 40.h),
@@ -245,18 +354,32 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             left: 0,
             right: 0,
             child: Center(
-              child: Container(
-                width: 87.w,
-                height: 80.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.r),
-                  image: const DecorationImage(
-                    image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                    fit: BoxFit.cover,
+              child: Obx(() {
+                final imageUrl = _profileController.profileImageUrl;
+
+                return Container(
+                  width: 87.w,
+                  height: 80.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24.r),
+                    color: AppColors.bgSecondary,
+                    image: imageUrl.isEmpty
+                        ? null
+                        : DecorationImage(
+                            image: NetworkImage(imageUrl),
+                            fit: BoxFit.cover,
+                          ),
+                    border: Border.all(color: Colors.white, width: 2.w),
                   ),
-                  border: Border.all(color: Colors.white, width: 2.w),
-                ),
-              ),
+                  child: imageUrl.isEmpty
+                      ? Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 38.w,
+                        )
+                      : null,
+                );
+              }),
             ),
           ),
           // 3. Edit Icon

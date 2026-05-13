@@ -1,3 +1,4 @@
+import 'package:fitness/controllers/trainer/trainer_profile_controller.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -18,10 +19,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  late final TrainerProfileController _profileController;
 
   bool _currentObscure = true;
   bool _newObscure = true;
   bool _confirmObscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileController = Get.isRegistered<TrainerProfileController>()
+        ? Get.find<TrainerProfileController>()
+        : Get.put(TrainerProfileController());
+  }
 
   @override
   void dispose() {
@@ -29,6 +39,45 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitChangePassword() async {
+    final currentPassword = _currentPasswordController.text;
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (currentPassword.isEmpty ||
+        newPassword.isEmpty ||
+        confirmPassword.isEmpty) {
+      Get.snackbar(
+        'Missing information',
+        'Please fill all password fields.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      Get.snackbar(
+        'Password mismatch',
+        'New password and confirm password do not match.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final success = await _profileController.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmNewPassword: confirmPassword,
+    );
+
+    if (!success) return;
+
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+    Get.back();
   }
 
   @override
@@ -103,9 +152,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     
                     SizedBox(height: 40.h),
-                    AppButton(
-                      onTap: () {},
-                      text: 'Save Changes',
+                    Obx(
+                      () => AppButton(
+                        isLoading: _profileController.isChangingPassword.value,
+                        onTap: _profileController.isChangingPassword.value
+                            ? () {}
+                            : _submitChangePassword,
+                        text: 'Save Changes',
+                      ),
                     ),
                   ],
                 ),

@@ -39,6 +39,7 @@ dependencies:
   flutter_svg: ^2.2.0
   cached_network_image: ^3.4.1
   shimmer: ^3.0.0
+  camera: ^0.11.0+2
   image_picker: ^1.1.2
   pin_code_fields: ^8.0.0
   http: ^1.2.2
@@ -52,7 +53,6 @@ dependencies:
   connectivity_plus: ^7.0.0
   google_sign_in: ^7.2.0
   cached_network_svg_image: ^1.2.0
-  flutter_dotenv: ^6.0.1
   flutter_map: ^8.3.0
   latlong2: ^0.9.1
   table_calendar: ^3.0.9
