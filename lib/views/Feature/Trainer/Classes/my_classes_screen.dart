@@ -13,7 +13,9 @@ import 'package:get/get.dart';
 class MyClassesScreen extends StatelessWidget {
   MyClassesScreen({super.key});
 
-  final MyClassesController controller = Get.put(MyClassesController());
+  final MyClassesController controller = Get.isRegistered<MyClassesController>()
+      ? Get.find<MyClassesController>()
+      : Get.put(MyClassesController());
 
   void _openCreateSheet(BuildContext context) {
     showModalBottomSheet(
@@ -38,6 +40,9 @@ class MyClassesScreen extends StatelessWidget {
         initialMaxMembers: cls["maxMembers"],
         initialClassType: cls["classType"],
         initialSessionFormat: cls["sessionFormat"],
+        initialDateTime: cls["startDateTime"] is DateTime
+            ? cls["startDateTime"] as DateTime
+            : null,
       ),
     );
   }
@@ -45,7 +50,7 @@ class MyClassesScreen extends StatelessWidget {
   void _openDeleteDialog(BuildContext context, int index) async {
     final confirmed = await showDeleteClassDialog(context);
     if (confirmed == true) {
-      controller.deleteClass(index);
+      await controller.deleteClass(index);
     }
   }
 
@@ -57,9 +62,23 @@ class MyClassesScreen extends StatelessWidget {
         children: [
           _buildHeader(context),
           Expanded(
-            child: Obx(() => ListView.builder(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.classes.isEmpty) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.actionPrimary,
+                  ),
+                );
+              }
+
+              return RefreshIndicator(
+                color: AppColors.actionPrimary,
+                onRefresh: () => controller.fetchClasses(showError: true),
+                child: ListView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
-                  itemCount: controller.classes.length + 1,
+                  itemCount: controller.classes.isEmpty
+                      ? 2
+                      : controller.classes.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       return Padding(
@@ -67,6 +86,19 @@ class MyClassesScreen extends StatelessWidget {
                         child: AppText(
                           "All Schedules",
                           style: AppTextStyles.base16SemiBold.copyWith(color: AppColors.textPrimary),
+                        ),
+                      );
+                    }
+                    if (controller.classes.isEmpty) {
+                      return Padding(
+                        padding: EdgeInsets.only(top: 80.h),
+                        child: Center(
+                          child: AppText(
+                            "No classes published yet",
+                            style: AppTextStyles.sm14Medium.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                         ),
                       );
                     }
@@ -87,7 +119,9 @@ class MyClassesScreen extends StatelessWidget {
                       ),
                     );
                   },
-                )),
+                ),
+              );
+            }),
           ),
 
           SizedBox(height: MediaQuery.of(context).size.height * 0.15),

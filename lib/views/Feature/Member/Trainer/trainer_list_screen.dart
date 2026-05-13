@@ -14,7 +14,10 @@ import '../../../../Helpers/route.dart';
 class TrainerListScreen extends StatelessWidget {
   TrainerListScreen({super.key});
 
-  final TrainerListController controller = Get.put(TrainerListController());
+  final TrainerListController controller =
+      Get.isRegistered<TrainerListController>()
+      ? Get.find<TrainerListController>()
+      : Get.put(TrainerListController());
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -171,27 +174,46 @@ class TrainerListScreen extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-            itemCount: 5,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.zero,
-                child: TrainerCard(
-                  name: "Arnold Swarznibble",
-                  expertise: "Yoga Specialist",
-                  rating: 4.5,
-                  price: "\$100/session",
-                  imageUrl: "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
-                  distance: "500m",
-                  reviewCount: 500,
-                  onTap: () {
-                    Get.toNamed(AppRoutes.trainerDetailsScreen);
-                  },
+          child: Obx(() {
+            if (controller.isLoadingNearby.value &&
+                controller.nearbyTrainers.isEmpty) {
+              return Center(
+                child: CircularProgressIndicator(color: AppColors.actionPrimary),
+              );
+            }
+
+            if (controller.nearbyTrainers.isEmpty) {
+              return RefreshIndicator(
+                color: AppColors.actionPrimary,
+                onRefresh: () => controller.fetchNearbyTrainers(showError: true),
+                child: ListView(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 80.h),
+                  children: [
+                    Center(
+                      child: Text(
+                        "No nearby trainers found.",
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
-            },
-          ),
+            }
+
+            return RefreshIndicator(
+              color: AppColors.actionPrimary,
+              onRefresh: () => controller.fetchNearbyTrainers(showError: true),
+              child: ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                itemCount: controller.nearbyTrainers.length,
+                itemBuilder: (context, index) {
+                  return _buildTrainerCard(controller.nearbyTrainers[index]);
+                },
+              ),
+            );
+          }),
         ),
       ],
     );
@@ -215,9 +237,13 @@ class TrainerListScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "1 Result Found.",
-                style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary),
+              Obx(
+                () => Text(
+                  "${controller.searchResults.length} Result Found.",
+                  style: AppTextStyles.base16Medium.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
               Row(
                 children: [
@@ -234,26 +260,73 @@ class TrainerListScreen extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            itemCount: 1,
-            itemBuilder: (context, index) {
-              return TrainerCard(
-                name: "Arnold Swarznibble",
-                expertise: "Yoga Specialist",
-                rating: 4.5,
-                price: "\$111/session",
-                imageUrl: "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
-                distance: "500m",
-                reviewCount: 500,
-                onTap: () {
-                  Get.toNamed(AppRoutes.trainerDetailsScreen);
-                },
+          child: Obx(() {
+            if (controller.isLoadingSearch.value) {
+              return Center(
+                child: CircularProgressIndicator(color: AppColors.actionPrimary),
               );
-            },
-          ),
+            }
+
+            if (controller.searchQuery.value.trim().isEmpty) {
+              return Center(
+                child: Text(
+                  "Search trainers by name.",
+                  style: AppTextStyles.sm14Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              );
+            }
+
+            if (controller.searchResults.isEmpty) {
+              return Center(
+                child: Text(
+                  "No trainers found.",
+                  style: AppTextStyles.sm14Medium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              itemCount: controller.searchResults.length,
+              itemBuilder: (context, index) {
+                return _buildTrainerCard(controller.searchResults[index]);
+              },
+            );
+          }),
         ),
       ],
+    );
+  }
+
+  Widget _buildTrainerCard(Map<String, dynamic> trainer) {
+    final imageUrl = trainer['imageUrl']?.toString();
+
+    return TrainerCard(
+      name: trainer['name']?.toString() ?? 'Trainer',
+      expertise: trainer['expertise']?.toString() ?? 'Fitness Trainer',
+      rating: trainer['rating'] is num
+          ? (trainer['rating'] as num).toDouble()
+          : 0,
+      price: trainer['price']?.toString() ?? 'Price unavailable',
+      imageUrl: imageUrl != null && imageUrl.isNotEmpty
+          ? imageUrl
+          : "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
+      distance: trainer['distance']?.toString().isNotEmpty == true
+          ? trainer['distance'].toString()
+          : null,
+      reviewCount: trainer['reviewCount'] is num
+          ? (trainer['reviewCount'] as num).toInt()
+          : null,
+      onTap: () {
+        Get.toNamed(
+          AppRoutes.trainerDetailsScreen,
+          arguments: controller.trainerArgs(trainer),
+        );
+      },
     );
   }
 }

@@ -10,8 +10,6 @@ import 'package:get/get.dart';
 import '../../../../Helpers/route.dart';
 import '../../../Base/AppText/appText.dart';
 
-import '../../../../Helpers/route.dart';
-
 class MemberHomeScreen extends StatelessWidget {
   MemberHomeScreen({super.key});
 
@@ -244,21 +242,58 @@ class MemberHomeScreen extends StatelessWidget {
   }
 
   Widget _buildTrainerList() {
-    return Obx(() => Column(
-      children: controller.trainers.map((trainer) {
-        return TrainerCard(
-          name: trainer["name"] as String,
-          expertise: trainer["expertise"] as String,
-          rating: (trainer["rating"] as num).toDouble(),
-          price: trainer["price"] as String,
-          imageUrl: "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
-          distance: trainer["location"] as String? ?? "500m",
-          onTap: () {
-            Get.toNamed(AppRoutes.trainerDetailsScreen);
-          },
+    return Obx(() {
+      if (controller.isLoadingTrainers.value && controller.trainers.isEmpty) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 24.h),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.actionPrimary),
+          ),
         );
-      }).toList(),
-    ));
+      }
+
+      if (controller.trainers.isEmpty) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 24.h),
+          child: Text(
+            "No nearby trainers found.",
+            style: AppTextStyles.sm14Medium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        children: controller.trainers.take(3).map((trainer) {
+          final imageUrl = trainer["imageUrl"]?.toString();
+
+          return TrainerCard(
+            name: trainer["name"]?.toString() ?? "Trainer",
+            expertise: trainer["expertise"]?.toString() ?? "Fitness Trainer",
+            rating: trainer["rating"] is num
+                ? (trainer["rating"] as num).toDouble()
+                : 0,
+            price: trainer["price"]?.toString() ?? "Price unavailable",
+            imageUrl: imageUrl != null && imageUrl.isNotEmpty
+                ? imageUrl
+                : "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
+            distance: trainer["distance"]?.toString().isNotEmpty == true
+                ? trainer["distance"].toString()
+                : null,
+            reviewCount: trainer["reviewCount"] is num
+                ? (trainer["reviewCount"] as num).toInt()
+                : null,
+            onTap: () {
+              Get.toNamed(
+                AppRoutes.trainerDetailsScreen,
+                arguments: controller.trainerArgs(trainer),
+              );
+            },
+          );
+        }).toList(),
+      );
+    });
   }
 
   void _showWorkoutDetailsBottomSheet() {

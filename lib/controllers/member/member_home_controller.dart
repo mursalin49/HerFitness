@@ -1,11 +1,25 @@
 import 'dart:async';
+import 'package:fitness/core/network/api_client.dart';
+import 'package:fitness/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MemberHomeController extends GetxController {
+  MemberHomeController({LocationService? locationService})
+    : _locationService = locationService ?? LocationService();
+
+  final LocationService _locationService;
+
   var selectedCategory = "All".obs;
-  
-  final List<String> categories = ["All", "Nearby", "Yoga", "Pilates", "Strength", "Cardio"];
+
+  final List<String> categories = [
+    "All",
+    "Nearby",
+    "Yoga",
+    "Pilates",
+    "Strength",
+    "Cardio",
+  ];
 
   var nextWorkouts = [
     {
@@ -17,24 +31,11 @@ class MemberHomeController extends GetxController {
     }
   ].obs;
 
-  var trainers = [
-    {
-      "name": "Seraphina Dubois",
-      "expertise": "Yoga & Pilates",
-      "rating": 4.5,
-      "price": "100/session",
-      "image": "assets/images/trainer_1.png",
-      "location": "500m"
-    },
-    {
-      "name": "Seraphina Dubois",
-      "expertise": "Yoga & Pilates",
-      "rating": 4.5,
-      "price": "150/session",
-      "image": "assets/images/trainer_1.png",
-      "location": "800m"
-    }
-  ].obs;
+  final trainers = <Map<String, dynamic>>[].obs;
+  final isLoadingTrainers = false.obs;
+
+  static const double defaultLat = 23.8103;
+  static const double defaultLng = 90.4125;
 
   // Banner Logic
   final PageController bannerPageController = PageController(initialPage: 1000);
@@ -68,6 +69,7 @@ class MemberHomeController extends GetxController {
   void onInit() {
     super.onInit();
     _startBannerTimer();
+    fetchNearbyTrainers();
   }
 
   void _startBannerTimer() {
@@ -92,5 +94,57 @@ class MemberHomeController extends GetxController {
 
   void setCategory(String category) {
     selectedCategory.value = category;
+    if ((category == "All" || category == "Nearby") && trainers.isEmpty) {
+      fetchNearbyTrainers();
+    }
+  }
+
+  Future<void> fetchNearbyTrainers({
+    double lat = defaultLat,
+    double lng = defaultLng,
+    double radiusKm = 10,
+    bool showError = false,
+  }) async {
+    try {
+      isLoadingTrainers.value = true;
+      try {
+        await _locationService.saveMemberLocation(lat: lat, lng: lng);
+      } catch (_) {
+        // Home can still show nearby trainers if saving location is rejected.
+      }
+      final response = await _locationService.findNearbyTrainers(
+        lat: lat,
+        lng: lng,
+        radiusKm: radiusKm,
+      );
+      trainers.assignAll(response.map((item) => item.toUiMap()));
+    } on ApiException catch (error) {
+      if (showError) {
+        Get.snackbar(
+          'Nearby trainers failed',
+          error.message,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      if (showError) {
+        Get.snackbar(
+          'Nearby trainers failed',
+          'Could not load nearby trainers.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } finally {
+      isLoadingTrainers.value = false;
+    }
+  }
+
+  Map<String, dynamic> trainerArgs(Map<String, dynamic> trainer) {
+    return {
+      'trainerId': trainer['id'],
+      'trainer': trainer,
+      'lat': defaultLat,
+      'lng': defaultLng,
+    };
   }
 }

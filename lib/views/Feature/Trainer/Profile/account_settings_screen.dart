@@ -1,3 +1,4 @@
+import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -204,7 +205,27 @@ class AccountSettingsScreen extends StatelessWidget {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        Get.dialog(
+                          Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.actionPrimary,
+                            ),
+                          ),
+                          barrierDismissible: false,
+                        );
+
+                        try {
+                          await AuthService().logout();
+                        } catch (_) {
+                          // AuthService clears local tokens even if the server logout fails.
+                        } finally {
+                          if (Get.isDialogOpen == true) {
+                            Get.back();
+                          }
+                        }
+
                         Get.offAllNamed(AppRoutes.signInScreen);
                       },
                       style: ElevatedButton.styleFrom(
