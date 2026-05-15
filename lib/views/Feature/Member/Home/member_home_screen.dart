@@ -1,4 +1,5 @@
 import 'package:fitness/controllers/member/member_home_controller.dart';
+import 'package:fitness/controllers/member/member_profile_controller.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,10 @@ class MemberHomeScreen extends StatelessWidget {
   MemberHomeScreen({super.key});
 
   final MemberHomeController controller = Get.put(MemberHomeController());
+  final MemberProfileController profileController =
+      Get.isRegistered<MemberProfileController>()
+      ? Get.find<MemberProfileController>()
+      : Get.put(MemberProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -34,91 +39,115 @@ class MemberHomeScreen extends StatelessWidget {
                   SizedBox(height: 16.h),
                   _buildNextWorkoutCard(),
                   SizedBox(height: 32.h),
-                  _buildSectionHeader("Nearby Trainer", () => Get.toNamed(AppRoutes.trainerListScreen)),
+                  _buildSectionHeader(
+                    "Nearby Trainer",
+                    () => Get.toNamed(AppRoutes.trainerListScreen),
+                  ),
                   SizedBox(height: 16.h),
                   _buildTrainerList(),
                   SizedBox(height: 130.h),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20.w, MediaQuery.of(context).padding.top + 16.h, 20.w, 24.h,),
-      decoration: BoxDecoration(
-        color: AppColors.actionPrimary,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32.r),
-          bottomRight: Radius.circular(32.r),
+    return Obx(() {
+      final imageUrl = profileController.profileImageUrl;
+
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          20.w,
+          MediaQuery.of(context).padding.top + 16.h,
+          20.w,
+          24.h,
         ),
-      ),
-      child: Row(
-        children: [
-          // Profile Image
-          GestureDetector(
-            onTap: (){
-              Get.toNamed(AppRoutes.trainerProfileScreen);
-            },
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.2),
-                border: Border.all(color: Colors.white, width: 2),
-                image: const DecorationImage(
-                  image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                  fit: BoxFit.cover,
+        decoration: BoxDecoration(
+          color: AppColors.actionPrimary,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(32.r),
+            bottomRight: Radius.circular(32.r),
+          ),
+        ),
+        child: Row(
+          children: [
+            // Profile Image
+            GestureDetector(
+              onTap: () {
+                Get.toNamed(AppRoutes.memberProfileScreen);
+              },
+              child: Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.2),
+                  border: Border.all(color: Colors.white, width: 2),
+                  image: imageUrl.isEmpty
+                      ? null
+                      : DecorationImage(
+                          image: NetworkImage(imageUrl),
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                child: imageUrl.isEmpty
+                    ? const Icon(Icons.person, color: Colors.white)
+                    : null,
+              ),
+            ),
+            SizedBox(width: 14.w),
+            // Greeting
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    "Welcome back",
+                    style: AppTextStyles.xs12Regular.copyWith(
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                  AppText(
+                    profileController.displayName,
+                    style: AppTextStyles.base16SemiBold.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Notification Icon
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.notificationScreen),
+              child: Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.2),
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    "assets/icons/notificationIcon.svg",
+                    width: 24.w,
+                    height: 24.w,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 14.w),
-          // Greeting
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  "Welcome back",
-                  style: AppTextStyles.xs12Regular.copyWith(color: Colors.white.withOpacity(0.8)),
-                ),
-                AppText(
-                  "Alex Johnson",
-                  style: AppTextStyles.base16SemiBold.copyWith(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          // Notification Icon
-          GestureDetector(
-            onTap: () => Get.toNamed(AppRoutes.notificationScreen),
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.2),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  "assets/icons/notificationIcon.svg",
-                  width: 24.w,
-                  height: 24.w,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildCategories() {
@@ -136,7 +165,9 @@ class MemberHomeScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.actionPrimary : Colors.white,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: isSelected ? null : Border.all(color: AppColors.borderPrimary),
+                  border: isSelected
+                      ? null
+                      : Border.all(color: AppColors.borderPrimary),
                 ),
                 child: Text(
                   category,
@@ -152,13 +183,14 @@ class MemberHomeScreen extends StatelessWidget {
     );
   }
 
-
-
   Widget _buildSectionHeader(String title, VoidCallback onTap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: AppTextStyles.lg18Bold.copyWith(color: AppColors.textPrimary)),
+        Text(
+          title,
+          style: AppTextStyles.lg18Bold.copyWith(color: AppColors.textPrimary),
+        ),
       ],
     );
   }
@@ -169,62 +201,74 @@ class MemberHomeScreen extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: 240.h,
-      decoration: BoxDecoration(
-        color: AppColors.bgTertiary,
-        borderRadius: BorderRadius.all( Radius.circular(32.r)),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            child: ClipRRect(
-              borderRadius: BorderRadius.all( Radius.circular(32.r)),
-              child: Image.network(
-                "https://eu.manduka.com/cdn/shop/articles/yogday.jpg?v=1718901651",
-                height: 240.h,
-                fit: BoxFit.cover,
+        decoration: BoxDecoration(
+          color: AppColors.bgTertiary,
+          borderRadius: BorderRadius.all(Radius.circular(32.r)),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(32.r)),
+                child: Image.network(
+                  "https://eu.manduka.com/cdn/shop/articles/yogday.jpg?v=1718901651",
+                  height: 240.h,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _buildIconLabel(Icons.calendar_today_outlined, "10-04-2026"),
-                    SizedBox(width: 16.w),
-                    _buildIconLabel(Icons.access_time, "30min"),
-                  ],
-                ),
-                const Spacer(),
-                Text(
-                  "Yoga Flow",
-                  style: AppTextStyles.xl20Bold.copyWith(color: AppColors.textPrimary, fontSize: 24.sp),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  "5 Series Workout",
-                  style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 20.w,
-            bottom: 20.h,
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: AppColors.actionPrimary,
-                borderRadius: BorderRadius.circular(16.r),
+            Padding(
+              padding: EdgeInsets.all(24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _buildIconLabel(
+                        Icons.calendar_today_outlined,
+                        "10-04-2026",
+                      ),
+                      SizedBox(width: 16.w),
+                      _buildIconLabel(Icons.access_time, "30min"),
+                    ],
+                  ),
+                  const Spacer(),
+                  Text(
+                    "Yoga Flow",
+                    style: AppTextStyles.xl20Bold.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 24.sp,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    "5 Series Workout",
+                    style: AppTextStyles.sm14Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-              child: Icon(Icons.arrow_forward, color: Colors.white, size: 24.sp),
             ),
-          ),
-        ],
+            Positioned(
+              right: 20.w,
+              bottom: 20.h,
+              child: Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: AppColors.actionPrimary,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  size: 24.sp,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    )
     );
   }
 
@@ -235,7 +279,9 @@ class MemberHomeScreen extends StatelessWidget {
         SizedBox(width: 6.w),
         Text(
           text,
-          style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+          style: AppTextStyles.sm14Medium.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
       ],
     );
@@ -326,7 +372,9 @@ class MemberHomeScreen extends StatelessWidget {
                 children: [
                   AppText(
                     "Your Next Workout",
-                    style: AppTextStyles.base16SemiBold.copyWith(color: AppColors.textPrimary),
+                    style: AppTextStyles.base16SemiBold.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   GestureDetector(
                     onTap: () => Get.back(),
@@ -364,7 +412,8 @@ class MemberHomeScreen extends StatelessWidget {
                 rating: 4.5,
                 reviewCount: 500,
                 price: "20 / session",
-                imageUrl: "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
+                imageUrl:
+                    "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
                 distance: "500m",
               ),
               SizedBox(height: 16.h),
@@ -375,18 +424,26 @@ class MemberHomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     "578 Boolean Ave, New York, NY, Turing St",
-                    style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.sm14Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                     textAlign: TextAlign.right,
                   ),
                   SizedBox(height: 12.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Icon(Icons.calendar_month, size: 20.sp, color: const Color(0xFF0284C7)),
+                      Icon(
+                        Icons.calendar_month,
+                        size: 20.sp,
+                        color: const Color(0xFF0284C7),
+                      ),
                       SizedBox(width: 8.w),
                       Text(
                         "10-04-2026",
-                        style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -394,11 +451,17 @@ class MemberHomeScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Icon(Icons.access_time_filled, size: 20.sp, color: const Color(0xFF0284C7)),
+                      Icon(
+                        Icons.access_time_filled,
+                        size: 20.sp,
+                        color: const Color(0xFF0284C7),
+                      ),
                       SizedBox(width: 8.w),
                       Text(
                         "11:00 AM",
-                        style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -412,12 +475,16 @@ class MemberHomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     "(406) 555-0120",
-                    style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.sm14Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   SizedBox(height: 8.h),
                   Text(
                     "(225) 555-0118",
-                    style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.sm14Medium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -457,7 +524,9 @@ class MemberHomeScreen extends StatelessWidget {
               SizedBox(width: 12.w),
               Text(
                 title,
-                style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.base16Medium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),

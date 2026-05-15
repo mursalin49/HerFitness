@@ -1,14 +1,24 @@
 import 'package:fitness/Helpers/route.dart';
 import 'package:fitness/core/network/api_client.dart';
+import 'package:fitness/core/storage/token_storage.dart';
 import 'package:fitness/services/auth_service.dart';
+import 'package:fitness/services/user_service.dart';
+import 'package:fitness/utils/auth_role.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignInController extends GetxController {
-  SignInController({AuthService? authService})
-    : _authService = authService ?? AuthService();
+  SignInController({
+    AuthService? authService,
+    UserService? userService,
+    TokenStorage? tokenStorage,
+  }) : _authService = authService ?? AuthService(),
+       _userService = userService ?? UserService(),
+       _tokenStorage = tokenStorage ?? TokenStorage();
 
   final AuthService _authService;
+  final UserService _userService;
+  final TokenStorage _tokenStorage;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -36,13 +46,22 @@ class SignInController extends GetxController {
         rememberMe: rememberMe.value,
       );
 
-      final role = authResponse.user?.role?.toLowerCase();
+      final role = await _resolveRole(authResponse.user?.role);
       if (role == 'trainer') {
         Get.offAllNamed(AppRoutes.trainerBottomNavScreen);
         return;
       }
 
-      Get.offAllNamed(AppRoutes.memberBottomNavScreen);
+      if (role == 'member') {
+        Get.offAllNamed(AppRoutes.memberBottomNavScreen);
+        return;
+      }
+
+      Get.snackbar(
+        'Sign in failed',
+        'Could not determine your account role. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } on ApiException catch (error) {
       Get.snackbar(
         'Sign in failed',
@@ -62,6 +81,25 @@ class SignInController extends GetxController {
 
   void toggleRememberMe() {
     rememberMe.value = !rememberMe.value;
+  }
+
+  Future<String?> _resolveRole(String? loginRole) async {
+    final parsedLoginRole = normalizeUserRole(loginRole);
+    if (parsedLoginRole != null) {
+      await _tokenStorage.saveUserRole(parsedLoginRole);
+      return parsedLoginRole;
+    }
+
+    try {
+      final currentUser = await _userService.getCurrentUser();
+      final profileRole = normalizeUserRole(currentUser.role);
+      if (profileRole != null) {
+        await _tokenStorage.saveUserRole(profileRole);
+      }
+      return profileRole;
+    } catch (_) {
+      return null;
+    }
   }
 
   @override

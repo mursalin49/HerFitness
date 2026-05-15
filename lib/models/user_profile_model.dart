@@ -1,3 +1,6 @@
+import 'package:fitness/utils/auth_role.dart';
+import 'package:fitness/utils/image_url.dart';
+
 class UserProfileModel {
   final String? id;
   final String? firstName;
@@ -31,23 +34,37 @@ class UserProfileModel {
     final data = _object(json['data']) ?? json;
     final source = _object(data['user']) ?? data;
     final profile =
+        _object(data['profile']) ??
+        _object(data['memberProfile']) ??
+        _object(data['member_profile']) ??
+        _object(data['trainerProfile']) ??
+        _object(data['trainer_profile']) ??
         _object(source['profile']) ??
+        _object(source['memberProfile']) ??
+        _object(source['member_profile']) ??
         _object(source['trainerProfile']) ??
         _object(source['trainer_profile']) ??
         const <String, dynamic>{};
 
     final firstName = _readString(source, const ['firstName', 'first_name']);
     final lastName = _readString(source, const ['lastName', 'last_name']);
-    final combinedName = [firstName, lastName]
-        .where((value) => value != null && value.trim().isNotEmpty)
-        .join(' ');
+    final combinedName = [
+      firstName,
+      lastName,
+    ].where((value) => value != null && value.trim().isNotEmpty).join(' ');
 
     return UserProfileModel(
       id: _readString(source, const ['id', 'userId', 'user_id']),
       firstName: firstName,
       lastName: lastName,
       fullName:
-          _readString(source, const ['name', 'fullName', 'full_name']) ??
+          _readString(source, const [
+            'name',
+            'displayName',
+            'display_name',
+            'fullName',
+            'full_name',
+          ]) ??
           (combinedName.isEmpty ? null : combinedName),
       email: _readString(source, const ['email']),
       phoneNumber: _readString(source, const [
@@ -56,24 +73,8 @@ class UserProfileModel {
         'phone',
       ]),
       gender: _readString(source, const ['gender']),
-      role: _readString(source, const ['role']),
-      imageUrl:
-          _readString(source, const [
-            'image',
-            'imageUrl',
-            'image_url',
-            'profileImage',
-            'profile_image',
-            'avatar',
-          ]) ??
-          _readString(profile, const [
-            'image',
-            'imageUrl',
-            'image_url',
-            'profileImage',
-            'profile_image',
-            'avatar',
-          ]),
+      role: normalizeUserRole(data) ?? normalizeUserRole(source),
+      imageUrl: _readImageUrl(source, profile),
       state:
           _readString(source, const ['state']) ??
           _readString(profile, const ['state']),
@@ -90,15 +91,20 @@ class UserProfileModel {
     final value = fullName?.trim();
     if (value != null && value.isNotEmpty) return value;
 
-    final combinedName = [firstName, lastName]
-        .where((value) => value != null && value.trim().isNotEmpty)
-        .join(' ');
+    final combinedName = [
+      firstName,
+      lastName,
+    ].where((value) => value != null && value.trim().isNotEmpty).join(' ');
     if (combinedName.isNotEmpty) return combinedName;
 
     final emailValue = email?.trim();
     if (emailValue != null && emailValue.isNotEmpty) {
       return emailValue.split('@').first;
     }
+
+    final roleValue = role?.trim().toLowerCase();
+    if (roleValue == 'member') return 'Member';
+    if (roleValue == 'admin') return 'Admin';
 
     return 'Trainer';
   }
@@ -119,6 +125,10 @@ class UserProfileModel {
 
   static Map<String, dynamic>? _object(dynamic value) {
     if (value is Map<String, dynamic>) return value;
+    if (value is Map) {
+      return value.map((key, value) => MapEntry(key.toString(), value));
+    }
+
     return null;
   }
 
@@ -126,11 +136,76 @@ class UserProfileModel {
     for (final key in keys) {
       final value = json[key];
       if (value == null) continue;
+      if (value is Map || value is Iterable) continue;
 
       final text = value.toString().trim();
       if (text.isNotEmpty && text.toLowerCase() != 'null') {
         return text;
       }
+    }
+
+    return null;
+  }
+
+  static const List<String> _imageKeys = [
+    'image',
+    'imageUrl',
+    'image_url',
+    'profileImage',
+    'profileImageUrl',
+    'profile_image',
+    'profile_image_url',
+    'profilePicture',
+    'profilePictureUrl',
+    'profile_picture',
+    'profile_picture_url',
+    'photo',
+    'photoUrl',
+    'photo_url',
+    'avatar',
+    'avatarUrl',
+    'avatar_url',
+    'url',
+    'secureUrl',
+    'secure_url',
+    'path',
+    'fileUrl',
+    'file_url',
+  ];
+
+  static const List<String> _imageObjectKeys = [
+    'image',
+    'profileImage',
+    'profileImageUrl',
+    'profile_image',
+    'profile_image_url',
+    'profilePicture',
+    'profilePictureUrl',
+    'profile_picture',
+    'profile_picture_url',
+    'photo',
+    'avatar',
+  ];
+
+  static String? _readImageUrl(
+    Map<String, dynamic> source,
+    Map<String, dynamic> profile,
+  ) {
+    final directValue =
+        _readString(source, _imageKeys) ?? _readString(profile, _imageKeys);
+    final nestedValue =
+        _readNestedImageUrl(source) ?? _readNestedImageUrl(profile);
+
+    return normalizeImageUrl(directValue ?? nestedValue);
+  }
+
+  static String? _readNestedImageUrl(Map<String, dynamic> json) {
+    for (final key in _imageObjectKeys) {
+      final image = _object(json[key]);
+      if (image == null) continue;
+
+      final value = _readString(image, _imageKeys);
+      if (value != null) return value;
     }
 
     return null;

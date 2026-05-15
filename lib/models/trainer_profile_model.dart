@@ -1,5 +1,8 @@
+import 'package:fitness/utils/image_url.dart';
+
 class TrainerProfileModel {
   final String? id;
+  final String? trainerUserId;
   final String name;
   final String specialty;
   final String price;
@@ -13,6 +16,7 @@ class TrainerProfileModel {
 
   const TrainerProfileModel({
     this.id,
+    this.trainerUserId,
     required this.name,
     required this.specialty,
     required this.price,
@@ -47,11 +51,18 @@ class TrainerProfileModel {
 
     final firstName = _readString(source, const ['firstName', 'first_name']);
     final lastName = _readString(source, const ['lastName', 'last_name']);
-    final combinedName = [firstName, lastName]
-        .where((value) => value != null && value.trim().isNotEmpty)
-        .join(' ');
+    final combinedName = [
+      firstName,
+      lastName,
+    ].where((value) => value != null && value.trim().isNotEmpty).join(' ');
     final name =
-        _readString(source, const ['name', 'fullName', 'full_name']) ??
+        _readString(source, const [
+          'name',
+          'displayName',
+          'display_name',
+          'fullName',
+          'full_name',
+        ]) ??
         (combinedName.isEmpty ? null : combinedName) ??
         'Trainer';
     final priceValue =
@@ -68,8 +79,21 @@ class TrainerProfileModel {
           'price_per_session',
         ]);
 
+    final trainerUserId =
+        _readString(source, const [
+          'trainerUserId',
+          'trainer_user_id',
+          'userId',
+          'user_id',
+        ]) ??
+        (user == null
+            ? null
+            : _readString(user, const ['id', 'userId', 'user_id'])) ??
+        _readString(source, const ['id']);
+
     return TrainerProfileModel(
       id: _readString(source, const ['id', 'userId', 'user_id']),
+      trainerUserId: trainerUserId,
       name: name,
       specialty:
           _readString(profile, const [
@@ -93,30 +117,9 @@ class TrainerProfileModel {
       reviewCount:
           _readInt(source, const ['reviewCount', 'review_count', 'reviews']) ??
           _readInt(profile, const ['reviewCount', 'review_count', 'reviews']),
-      imageUrl:
-          _readString(source, const [
-            'image',
-            'imageUrl',
-            'image_url',
-            'profileImage',
-            'profile_image',
-            'avatar',
-          ]) ??
-          _readString(profile, const [
-            'image',
-            'imageUrl',
-            'image_url',
-            'profileImage',
-            'profile_image',
-            'avatar',
-          ]) ??
-          '',
+      imageUrl: _readImageUrl(source, profile) ?? '',
       distance: _formatDistance(
-        _readDouble(source, const [
-              'distance',
-              'distanceKm',
-              'distance_km',
-            ]) ??
+        _readDouble(source, const ['distance', 'distanceKm', 'distance_km']) ??
             _readDouble(profile, const [
               'distance',
               'distanceKm',
@@ -139,6 +142,7 @@ class TrainerProfileModel {
   Map<String, dynamic> toUiMap() {
     return {
       'id': id,
+      'trainerUserId': trainerUserId,
       'name': name,
       'expertise': specialty,
       'rating': rating,
@@ -178,11 +182,76 @@ class TrainerProfileModel {
     for (final key in keys) {
       final value = json[key];
       if (value == null) continue;
+      if (value is Map || value is Iterable) continue;
 
       final text = value.toString().trim();
       if (text.isNotEmpty && text.toLowerCase() != 'null') {
         return text;
       }
+    }
+
+    return null;
+  }
+
+  static const List<String> _imageKeys = [
+    'image',
+    'imageUrl',
+    'image_url',
+    'profileImage',
+    'profileImageUrl',
+    'profile_image',
+    'profile_image_url',
+    'profilePicture',
+    'profilePictureUrl',
+    'profile_picture',
+    'profile_picture_url',
+    'photo',
+    'photoUrl',
+    'photo_url',
+    'avatar',
+    'avatarUrl',
+    'avatar_url',
+    'url',
+    'secureUrl',
+    'secure_url',
+    'path',
+    'fileUrl',
+    'file_url',
+  ];
+
+  static const List<String> _imageObjectKeys = [
+    'image',
+    'profileImage',
+    'profileImageUrl',
+    'profile_image',
+    'profile_image_url',
+    'profilePicture',
+    'profilePictureUrl',
+    'profile_picture',
+    'profile_picture_url',
+    'photo',
+    'avatar',
+  ];
+
+  static String? _readImageUrl(
+    Map<String, dynamic> source,
+    Map<String, dynamic> profile,
+  ) {
+    final directValue =
+        _readString(source, _imageKeys) ?? _readString(profile, _imageKeys);
+    final nestedValue =
+        _readNestedImageUrl(source) ?? _readNestedImageUrl(profile);
+
+    return normalizeImageUrl(directValue ?? nestedValue);
+  }
+
+  static String? _readNestedImageUrl(Map<String, dynamic> json) {
+    for (final key in _imageObjectKeys) {
+      final image = _object(json[key]);
+      if (image == null) continue;
+
+      final value = _readString(image, _imageKeys);
+      if (value != null) return value;
     }
 
     return null;

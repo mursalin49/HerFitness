@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:fitness/Helpers/route.dart';
+import 'package:fitness/controllers/auth/member_register_controller.dart';
 import 'package:fitness/controllers/auth/trainer_register_controller.dart';
 import 'package:fitness/core/network/api_client.dart';
-import 'package:fitness/models/identity_verification_payload.dart';
+import 'package:fitness/models/member_register_payload.dart';
 import 'package:fitness/models/trainer_register_payload.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
@@ -32,12 +33,17 @@ class _VerifyIdentityScreenState extends State<VerifyIdentityScreen> {
   final TextEditingController idCardNumberController = TextEditingController();
   late final String role;
   late final Map<String, String>? trainerRegisterDraft;
+  late final Map<String, String>? memberRegisterDraft;
 
   @override
   void initState() {
     super.initState();
     role = _identityRoleFromArgs();
-    trainerRegisterDraft = _trainerRegisterDraftFromArgs();
+    trainerRegisterDraft =
+        _trainerRegisterDraftFromArgs() ??
+        _trainerRegisterDraftFromController();
+    memberRegisterDraft =
+        _memberRegisterDraftFromArgs() ?? _memberRegisterDraftFromController();
   }
 
   @override
@@ -65,6 +71,7 @@ class _VerifyIdentityScreenState extends State<VerifyIdentityScreen> {
         documentType: selectedDocument,
         idCardNumber: idCardNumber,
         trainerRegisterDraft: trainerRegisterDraft,
+        memberRegisterDraft: memberRegisterDraft,
       ),
     );
   }
@@ -229,6 +236,9 @@ class _IdentityCameraScreenState extends State<IdentityCameraScreen> {
   Map<String, String>? get trainerRegisterDraft =>
       _trainerRegisterDraftFromArgs() ?? _trainerRegisterDraftFromController();
 
+  Map<String, String>? get memberRegisterDraft =>
+      _memberRegisterDraftFromArgs() ?? _memberRegisterDraftFromController();
+
   String? get frontImagePath => _identityStringArg('frontImagePath');
 
   String? get backImagePath => _identityStringArg('backImagePath');
@@ -355,6 +365,7 @@ class _IdentityCameraScreenState extends State<IdentityCameraScreen> {
           backImagePath: backImagePath,
           capturedImagePath: capturedImage.path,
           trainerRegisterDraft: trainerRegisterDraft,
+          memberRegisterDraft: memberRegisterDraft,
         ),
       );
     } catch (_) {
@@ -485,6 +496,9 @@ class IdentityCheckQualityScreen extends StatelessWidget {
   Map<String, String>? get trainerRegisterDraft =>
       _trainerRegisterDraftFromArgs();
 
+  Map<String, String>? get memberRegisterDraft =>
+      _memberRegisterDraftFromArgs() ?? _memberRegisterDraftFromController();
+
   String? get capturedImagePath => _identityStringArg('capturedImagePath');
 
   String? get frontImagePath => _identityStringArg('frontImagePath');
@@ -512,6 +526,7 @@ class IdentityCheckQualityScreen extends StatelessWidget {
           idCardNumber: idCardNumber,
           frontImagePath: currentImagePath,
           trainerRegisterDraft: trainerRegisterDraft,
+          memberRegisterDraft: memberRegisterDraft,
         ),
       );
       return;
@@ -527,6 +542,7 @@ class IdentityCheckQualityScreen extends StatelessWidget {
         frontImagePath: frontImagePath,
         backImagePath: currentImagePath,
         trainerRegisterDraft: trainerRegisterDraft,
+        memberRegisterDraft: memberRegisterDraft,
       ),
     );
   }
@@ -542,6 +558,7 @@ class IdentityCheckQualityScreen extends StatelessWidget {
         frontImagePath: frontImagePath,
         backImagePath: backImagePath,
         trainerRegisterDraft: trainerRegisterDraft,
+        memberRegisterDraft: memberRegisterDraft,
       ),
     );
   }
@@ -618,6 +635,9 @@ class IdentityReviewScreen extends StatelessWidget {
   Map<String, String>? get trainerRegisterDraft =>
       _trainerRegisterDraftFromArgs() ?? _trainerRegisterDraftFromController();
 
+  Map<String, String>? get memberRegisterDraft =>
+      _memberRegisterDraftFromArgs() ?? _memberRegisterDraftFromController();
+
   String? get frontImagePath => _identityStringArg('frontImagePath');
 
   String? get backImagePath => _identityStringArg('backImagePath');
@@ -637,6 +657,9 @@ class IdentityReviewScreen extends StatelessWidget {
   bool get _isTrainerRegistration =>
       role == 'trainer' || trainerRegisterDraft != null;
 
+  bool get _isMemberRegistration =>
+      role == 'member' && memberRegisterDraft != null;
+
   Future<void> _submitVerification() async {
     final frontPath = frontImagePath;
     final backPath = backImagePath;
@@ -651,15 +674,10 @@ class IdentityReviewScreen extends StatelessWidget {
       return;
     }
 
-    final payload = IdentityVerificationPayload(
-      role: role,
-      documentType: documentType,
-      frontImagePath: frontPath,
-      backImagePath: backPath,
-    );
-    final draft = trainerRegisterDraft;
+    final trainerDraft = trainerRegisterDraft;
+    final memberDraft = memberRegisterDraft;
 
-    if (_isTrainerRegistration && draft == null) {
+    if (_isTrainerRegistration && trainerDraft == null) {
       Get.snackbar(
         'Registration incomplete',
         'Trainer registration information is missing. Please sign up again.',
@@ -668,27 +686,36 @@ class IdentityReviewScreen extends StatelessWidget {
       return;
     }
 
+    if (_isMemberRegistration && memberDraft == null) {
+      Get.snackbar(
+        'Registration incomplete',
+        'Member registration information is missing. Please sign up again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     try {
       _showLoadingDialog();
 
-      if (_isTrainerRegistration && draft != null) {
+      if (_isTrainerRegistration && trainerDraft != null) {
         await AuthService().registerTrainer(
           TrainerRegisterPayload(
-            name: draft['name'] ?? '',
-            email: draft['email'] ?? '',
-            phoneNumber: draft['phoneNumber'] ?? '',
-            state: draft['state'] ?? '',
-            location: draft['location'] ?? '',
+            name: trainerDraft['name'] ?? '',
+            email: trainerDraft['email'] ?? '',
+            phoneNumber: trainerDraft['phoneNumber'] ?? '',
+            state: trainerDraft['state'] ?? '',
+            location: trainerDraft['location'] ?? '',
             idCardType: _backendIdCardType(documentType),
             idCardNumber: cardNumber,
-            bio: draft['bio'] ?? '',
-            classesTaught: draft['classesTaught'] ?? '',
-            instructorExperience: draft['instructorExperience'] ?? '',
-            certifications: draft['certifications'] ?? '',
-            classDeliveryMode: draft['classDeliveryMode'] ?? 'BOTH',
-            password: draft['password'] ?? '',
-            confirmPassword: draft['confirmPassword'] ?? '',
-            imagePath: draft['imagePath'] ?? '',
+            bio: trainerDraft['bio'] ?? '',
+            classesTaught: trainerDraft['classesTaught'] ?? '',
+            instructorExperience: trainerDraft['instructorExperience'] ?? '',
+            certifications: trainerDraft['certifications'] ?? '',
+            classDeliveryMode: trainerDraft['classDeliveryMode'] ?? 'BOTH',
+            password: trainerDraft['password'] ?? '',
+            confirmPassword: trainerDraft['confirmPassword'] ?? '',
+            imagePath: trainerDraft['imagePath'] ?? '',
             idCardFrontImagePath: frontPath,
             idCardBackImagePath: backPath,
           ),
@@ -703,14 +730,47 @@ class IdentityReviewScreen extends StatelessWidget {
           arguments: {
             'flow': 'signup',
             'role': 'trainer',
-            'email': draft['email'] ?? '',
+            'email': trainerDraft['email'] ?? '',
             'nextRoute': AppRoutes.trainerBottomNavScreen,
             'backLabel': 'Back to Login',
           },
         );
         return;
-      } else {
-        debugPrint('Identity verification payload: ${payload.toJson()}');
+      }
+
+      if (_isMemberRegistration && memberDraft != null) {
+        await AuthService().registerMember(
+          MemberRegisterPayload(
+            name: memberDraft['name'] ?? '',
+            email: memberDraft['email'] ?? '',
+            phoneNumber: memberDraft['phoneNumber'] ?? '',
+            state: memberDraft['state'] ?? '',
+            location: memberDraft['location'] ?? '',
+            idCardType: _backendIdCardType(documentType),
+            idCardNumber: cardNumber,
+            password: memberDraft['password'] ?? '',
+            confirmPassword: memberDraft['confirmPassword'] ?? '',
+            imagePath: memberDraft['imagePath'] ?? '',
+            idCardFrontImagePath: frontPath,
+            idCardBackImagePath: backPath,
+          ),
+        );
+
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+
+        Get.offAllNamed(
+          AppRoutes.passwordVerificationScreen,
+          arguments: {
+            'flow': 'signup',
+            'role': 'member',
+            'email': memberDraft['email'] ?? '',
+            'nextRoute': AppRoutes.memberBottomNavScreen,
+            'backLabel': 'Back to Login',
+          },
+        );
+        return;
       }
 
       if (Get.isDialogOpen == true) {
@@ -1329,6 +1389,21 @@ Map<String, String>? _trainerRegisterDraftFromController() {
   return Get.find<TrainerRegisterController>().identityVerificationDraft;
 }
 
+Map<String, String>? _memberRegisterDraftFromArgs() {
+  final args = Get.arguments;
+  if (args is! Map || args['memberRegisterDraft'] is! Map) return null;
+
+  final draft = args['memberRegisterDraft'] as Map;
+  return draft.map(
+    (key, value) => MapEntry(key.toString(), value?.toString() ?? ''),
+  );
+}
+
+Map<String, String>? _memberRegisterDraftFromController() {
+  if (!Get.isRegistered<MemberRegisterController>()) return null;
+  return Get.find<MemberRegisterController>().identityVerificationDraft;
+}
+
 String _backendIdCardType(String documentType) {
   final normalized = documentType.toLowerCase();
   if (normalized.contains('national')) return 'NID';
@@ -1346,6 +1421,7 @@ Map<String, dynamic> _identityArgs(
   String? backImagePath,
   String? capturedImagePath,
   Map<String, String>? trainerRegisterDraft,
+  Map<String, String>? memberRegisterDraft,
 }) {
   final args = <String, dynamic>{
     'role': role,
@@ -1365,6 +1441,9 @@ Map<String, dynamic> _identityArgs(
   addIfPresent('capturedImagePath', capturedImagePath);
   if (trainerRegisterDraft != null) {
     args['trainerRegisterDraft'] = trainerRegisterDraft;
+  }
+  if (memberRegisterDraft != null) {
+    args['memberRegisterDraft'] = memberRegisterDraft;
   }
 
   return args;

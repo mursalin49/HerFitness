@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness/Helpers/route.dart';
+import 'package:fitness/core/storage/token_storage.dart';
 import 'package:get/get.dart';
 import '../../../../utils/AppColor/app_colors.dart';
 
@@ -11,13 +12,33 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final TokenStorage _tokenStorage = TokenStorage();
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
+    _routeAfterSplash();
+  }
+
+  Future<void> _routeAfterSplash() async {
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+
+    final accessToken = await _tokenStorage.getAccessToken();
+    final role = (await _tokenStorage.getUserRole())?.toLowerCase();
+    if (!mounted) return;
+
+    if (accessToken == null || accessToken.isEmpty) {
       Get.offAllNamed(AppRoutes.welcomeScreen);
-    });
+      return;
+    }
+
+    if (role == 'trainer') {
+      Get.offAllNamed(AppRoutes.trainerBottomNavScreen);
+      return;
+    }
+
+    Get.offAllNamed(AppRoutes.memberBottomNavScreen);
   }
 
   @override

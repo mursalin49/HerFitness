@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:fitness/Helpers/route.dart';
 import 'package:fitness/core/network/api_client.dart';
+import 'package:fitness/core/storage/token_storage.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
@@ -24,6 +25,7 @@ class PasswordVerificationScreen extends StatefulWidget {
 class _PasswordVerificationScreenState
     extends State<PasswordVerificationScreen> {
   final AuthService _authService = AuthService();
+  final TokenStorage _tokenStorage = TokenStorage();
   String code = '';
   bool isVerifying = false;
   bool isResending = false;
@@ -52,18 +54,28 @@ class _PasswordVerificationScreenState
 
     try {
       setState(() => isVerifying = true);
-      await _authService.verifyEmail(email: email, code: currentCode);
 
       if (_isForgotPasswordFlow) {
+        final resetKey = await _authService.verifyPasswordResetOtp(
+          email: email,
+          otp: currentCode,
+        );
         Get.toNamed(
           AppRoutes.changePasswordScreen,
-          arguments: {'email': email, 'code': currentCode},
+          arguments: {'email': email, 'resetKey': resetKey},
         );
         return;
       }
 
+      await _authService.verifyEmail(email: email, code: currentCode);
+
       if (_nextRoute.isNotEmpty) {
-        Get.offAllNamed(_nextRoute);
+        final accessToken = await _tokenStorage.getAccessToken();
+        if (accessToken != null && accessToken.isNotEmpty) {
+          Get.offAllNamed(_nextRoute);
+        } else {
+          Get.offAllNamed(AppRoutes.signInScreen);
+        }
         return;
       }
 
@@ -206,6 +218,9 @@ class _PasswordVerificationScreenState
 
     if (args is Map && args['trainerRegisterDraft'] is Map) {
       identityArgs['trainerRegisterDraft'] = args['trainerRegisterDraft'];
+    }
+    if (args is Map && args['memberRegisterDraft'] is Map) {
+      identityArgs['memberRegisterDraft'] = args['memberRegisterDraft'];
     }
 
     return identityArgs;

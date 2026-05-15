@@ -1,3 +1,6 @@
+import 'package:fitness/utils/auth_role.dart';
+import 'package:fitness/utils/image_url.dart';
+
 class AuthResponseModel {
   final String accessToken;
   final String? refreshToken;
@@ -14,16 +17,16 @@ class AuthResponseModel {
         ? json['data'] as Map<String, dynamic>
         : json;
 
-    final userJson = data['user'];
+    final userJson = data['user'] is Map<String, dynamic>
+        ? data['user'] as Map<String, dynamic>
+        : data;
 
     return AuthResponseModel(
       accessToken:
           (data['access_token'] ?? data['accessToken'] ?? data['token'] ?? '')
               .toString(),
       refreshToken: (data['refresh_token'] ?? data['refreshToken'])?.toString(),
-      user: userJson is Map<String, dynamic>
-          ? UserModel.fromJson(userJson)
-          : null,
+      user: UserModel.fromJson(userJson),
     );
   }
 }
@@ -54,20 +57,32 @@ class UserModel {
 
     return UserModel(
       id: int.tryParse((json['id'] ?? '').toString()),
-      name: (json['name'] ?? json['fullName'] ?? json['full_name'] ?? combinedName)
-          .toString()
-          .trim(),
+      name:
+          (json['name'] ??
+                  json['displayName'] ??
+                  json['display_name'] ??
+                  json['fullName'] ??
+                  json['full_name'] ??
+                  combinedName)
+              .toString()
+              .trim(),
       email: json['email']?.toString(),
       phone: (json['phone'] ?? json['phoneNumber'] ?? json['phone_number'])
           ?.toString(),
-      role: json['role']?.toString(),
-      imageUrl:
-          (json['image'] ??
-                  json['image_url'] ??
-                  json['profileImage'] ??
-                  json['profile_image'] ??
-                  json['avatar'])
-              ?.toString(),
+      role: normalizeUserRole(json),
+      imageUrl: normalizeImageUrl(
+        (json['image'] ??
+                json['imageUrl'] ??
+                json['image_url'] ??
+                json['profileImage'] ??
+                json['profileImageUrl'] ??
+                json['profile_image'] ??
+                json['profile_image_url'] ??
+                json['avatar'] ??
+                json['avatarUrl'] ??
+                json['avatar_url'])
+            ?.toString(),
+      ),
     );
   }
 

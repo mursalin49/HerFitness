@@ -1,5 +1,6 @@
 import '../../Base/ProfilePicPicker/profile_pic_picker.dart';
 import 'package:fitness/Helpers/route.dart';
+import 'package:fitness/controllers/auth/member_register_controller.dart';
 import 'package:fitness/views/Base/AppButton/appButton.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
 import 'package:flutter/material.dart';
@@ -17,58 +18,14 @@ class MemberSignUpScreen extends StatefulWidget {
 }
 
 class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController stateController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  late final MemberRegisterController registerController;
 
-  void _continueToPasswordVerification() {
-    final validationMessage = _validate();
-    if (validationMessage != null) {
-      Get.snackbar(
-        'Registration incomplete',
-        validationMessage,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    Get.toNamed(
-      AppRoutes.passwordVerificationScreen,
-      arguments: {
-        'flow': 'signup',
-        'role': 'member',
-        'email': emailController.text.trim(),
-      },
-    );
-  }
-
-  String? _validate() {
-    final requiredValues = {
-      'name': nameController.text,
-      'email': emailController.text,
-      'phone number': phoneController.text,
-      'state': stateController.text,
-      'location': locationController.text,
-      'password': passwordController.text,
-      'confirm password': confirmPasswordController.text,
-    };
-
-    for (final entry in requiredValues.entries) {
-      if (entry.value.trim().isEmpty) {
-        return 'Please enter ${entry.key}.';
-      }
-    }
-
-    if (passwordController.text != confirmPasswordController.text) {
-      return 'Password and confirm password do not match.';
-    }
-
-    return null;
+  @override
+  void initState() {
+    super.initState();
+    registerController = Get.isRegistered<MemberRegisterController>()
+        ? Get.find<MemberRegisterController>()
+        : Get.put(MemberRegisterController());
   }
 
   Widget _buildLabel(String text) {
@@ -120,9 +77,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                   // Profile picture picker
                   ProfilePicPicker(
                     placeholderImage: "assets/images/memberImg.png",
-                    onImagePicked: (file) {
-                      // Handle picked file safely
-                    },
+                    onImagePicked: registerController.setProfileImage,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.04),
 
@@ -150,7 +105,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           _buildLabel("Enter your name"),
                           CustomTextField(
                             hintText: 'Enter your name',
-                            controller: nameController,
+                            controller: registerController.nameController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/personIcon.svg",
@@ -160,7 +115,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           _buildLabel("Enter your email"),
                           CustomTextField(
                             hintText: 'Enter your E-mail',
-                            controller: emailController,
+                            controller: registerController.emailController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/emailIcon.svg",
@@ -170,7 +125,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           _buildLabel("Phone number"),
                           CustomTextField(
                             hintText: '(229) 555-0109',
-                            controller: phoneController,
+                            controller: registerController.phoneController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/phoneIcon.svg",
@@ -180,7 +135,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           _buildLabel("Your state"),
                           CustomTextField(
                             hintText: 'Select your state',
-                            controller: stateController,
+                            controller: registerController.stateController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                           ),
@@ -189,7 +144,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           _buildLabel("Your location"),
                           CustomTextField(
                             hintText: 'Syracuse, Connecticut',
-                            controller: locationController,
+                            controller: registerController.locationController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/locationIcon.svg",
@@ -199,7 +154,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           _buildLabel("Password"),
                           CustomTextField(
                             hintText: '******',
-                            controller: passwordController,
+                            controller: registerController.passwordController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/lock.svg",
@@ -210,7 +165,8 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                           _buildLabel("Confirm Password"),
                           CustomTextField(
                             hintText: '******',
-                            controller: confirmPasswordController,
+                            controller:
+                                registerController.confirmPasswordController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/lock.svg",
@@ -273,9 +229,15 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                             height: MediaQuery.of(context).size.height * 0.040,
                           ),
 
-                          AppButton(
-                            text: "Sign up",
-                            onTap: _continueToPasswordVerification,
+                          Obx(
+                            () => AppButton(
+                              text: "Sign up",
+                              isLoading: registerController.isLoading.value,
+                              onTap: registerController.isLoading.value
+                                  ? () {}
+                                  : registerController
+                                        .continueToIdentityVerification,
+                            ),
                           ),
 
                           SizedBox(
@@ -293,7 +255,7 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
                               ),
                               InkWell(
                                 onTap: () {
-                                  Get.back();
+                                  Get.toNamed(AppRoutes.signInScreen);
                                 },
                                 child: AppText(
                                   "Login",
@@ -318,17 +280,5 @@ class _MemberSignUpScreenState extends State<MemberSignUpScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    stateController.dispose();
-    locationController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.dispose();
   }
 }

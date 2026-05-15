@@ -15,6 +15,7 @@ class PasswordRecoveryController extends GetxController {
   final confirmPasswordController = TextEditingController();
 
   final code = ''.obs;
+  final resetKey = ''.obs;
   final isSendingCode = false.obs;
   final isVerifyingCode = false.obs;
   final isResettingPassword = false.obs;
@@ -69,10 +70,14 @@ class PasswordRecoveryController extends GetxController {
 
     try {
       isVerifyingCode.value = true;
-      await _authService.verifyEmail(email: email, code: currentCode);
+      final key = await _authService.verifyPasswordResetOtp(
+        email: email,
+        otp: currentCode,
+      );
+      resetKey.value = key;
       Get.toNamed(
         AppRoutes.changePasswordScreen,
-        arguments: {'email': email, 'code': currentCode},
+        arguments: {'email': email, 'resetKey': key},
       );
     } on ApiException catch (error) {
       Get.snackbar(
@@ -93,14 +98,14 @@ class PasswordRecoveryController extends GetxController {
 
   Future<void> resetPassword() async {
     final email = _emailFromArgsOrController;
-    final currentCode = _codeFromArgsOrController;
+    final currentResetKey = _resetKeyFromArgsOrController;
     final newPassword = newPasswordController.text;
     final confirmNewPassword = confirmPasswordController.text;
 
-    if (email.isEmpty || currentCode.isEmpty) {
+    if (email.isEmpty || currentResetKey.isEmpty) {
       Get.snackbar(
         'Reset failed',
-        'Email or verification code is missing.',
+        'Email or reset key is missing.',
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -127,8 +132,7 @@ class PasswordRecoveryController extends GetxController {
     try {
       isResettingPassword.value = true;
       await _authService.resetPassword(
-        email: email,
-        code: currentCode,
+        resetKey: currentResetKey,
         newPassword: newPassword,
         confirmNewPassword: confirmNewPassword,
       );
@@ -163,12 +167,12 @@ class PasswordRecoveryController extends GetxController {
     return emailController.text.trim();
   }
 
-  String get _codeFromArgsOrController {
+  String get _resetKeyFromArgsOrController {
     final args = Get.arguments;
-    if (args is Map && args['code'] is String) {
-      return args['code'] as String;
+    if (args is Map && args['resetKey'] is String) {
+      return args['resetKey'] as String;
     }
-    return code.value.trim();
+    return resetKey.value.trim();
   }
 
   @override

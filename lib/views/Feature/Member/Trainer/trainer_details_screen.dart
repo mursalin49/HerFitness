@@ -1,7 +1,9 @@
+import 'package:fitness/controllers/common/chat_controller.dart';
 import 'package:fitness/controllers/member/trainer_details_controller.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/CustomAppbar/custom_appbar.dart';
+import 'package:fitness/views/Feature/common/chat/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -67,7 +69,9 @@ class TrainerDetailsScreen extends StatelessWidget {
             height: 400.h,
             width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(40.r),
+              ),
               image: DecorationImage(
                 image: NetworkImage(displayImage),
                 fit: BoxFit.cover,
@@ -78,7 +82,9 @@ class TrainerDetailsScreen extends StatelessWidget {
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(40.r),
+                ),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -138,19 +144,57 @@ class TrainerDetailsScreen extends StatelessWidget {
           Positioned(
             right: 20.w,
             bottom: 30.h,
-            child: Container(
-              width: 56.w,
-              height: 56.w,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+            child: GestureDetector(
+              onTap: () => _startTrainerChat(trainer),
+              child: Container(
+                width: 56.w,
+                height: 56.w,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.chat_bubble,
+                  color: Colors.black,
+                  size: 24.sp,
+                ),
               ),
-              child: Icon(Icons.chat_bubble, color: Colors.black, size: 24.sp),
             ),
           ),
         ],
       );
     });
+  }
+
+  Future<void> _startTrainerChat(Map<String, dynamic> trainer) async {
+    final trainerUserId =
+        trainer['trainerUserId']?.toString() ??
+        trainer['trainer_user_id']?.toString() ??
+        trainer['userId']?.toString() ??
+        trainer['user_id']?.toString() ??
+        trainer['id']?.toString();
+
+    if (trainerUserId == null || trainerUserId.isEmpty) {
+      Get.snackbar(
+        'Chat unavailable',
+        'Trainer user id is missing.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final chatController = Get.isRegistered<ChatController>()
+        ? Get.find<ChatController>()
+        : Get.put(ChatController());
+    final contact = await chatController.startConversationWithTrainer(
+      trainerUserId: trainerUserId,
+      trainerName: trainer['name']?.toString(),
+      avatarUrl: trainer['imageUrl']?.toString(),
+    );
+
+    if (contact != null) {
+      Get.to(() => ChatScreen(contact: contact));
+    }
   }
 
   Widget _buildCircleButton(IconData icon, VoidCallback onTap) {
@@ -205,19 +249,26 @@ class TrainerDetailsScreen extends StatelessWidget {
   Widget _buildStatItem(String value, String label) {
     return Column(
       children: [
-        Text(value, style: AppTextStyles.lg18Bold.copyWith(color: AppColors.textPrimary, fontSize: 22.sp)),
+        Text(
+          value,
+          style: AppTextStyles.lg18Bold.copyWith(
+            color: AppColors.textPrimary,
+            fontSize: 22.sp,
+          ),
+        ),
         SizedBox(height: 4.h),
-        Text(label, style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textTertiary)),
+        Text(
+          label,
+          style: AppTextStyles.sm14Medium.copyWith(
+            color: AppColors.textTertiary,
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildDivider() {
-    return Container(
-      height: 40.h,
-      width: 1,
-      color: AppColors.borderPrimary,
-    );
+    return Container(height: 40.h, width: 1, color: AppColors.borderPrimary);
   }
 
   Widget _buildAvailabilitySection() {
@@ -236,24 +287,37 @@ class TrainerDetailsScreen extends StatelessWidget {
                     onTap: () => controller.selectTimeSlot(time),
                     child: Container(
                       margin: EdgeInsets.only(right: 12.w),
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 12.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.actionPrimary : Colors.white,
+                        color: isSelected
+                            ? AppColors.actionPrimary
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: isSelected ? AppColors.actionPrimary : AppColors.borderPrimary),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.actionPrimary
+                              : AppColors.borderPrimary,
+                        ),
                       ),
                       child: Column(
                         children: [
                           Text(
                             time,
                             style: AppTextStyles.sm14Medium.copyWith(
-                              color: isSelected ? Colors.white : AppColors.textPrimary,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           Text(
                             "Available",
                             style: AppTextStyles.sm14Medium.copyWith(
-                              color: isSelected ? Colors.white.withValues(alpha: 0.8) : AppColors.textSecondary,
+                              color: isSelected
+                                  ? Colors.white.withValues(alpha: 0.8)
+                                  : AppColors.textSecondary,
                               fontSize: 12.sp,
                             ),
                           ),
@@ -276,22 +340,28 @@ class TrainerDetailsScreen extends StatelessWidget {
         "name": "Charles D. Xavier",
         "rating": "4.5",
         "time": "3d ago",
-        "text": "I've been practicing my glutes with coach Seraphina Dubois for the past week, and I feel better! The personalized recommendation is simply a beast!!",
-        "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        "text":
+            "I've been practicing my glutes with coach Seraphina Dubois for the past week, and I feel better! The personalized recommendation is simply a beast!!",
+        "image":
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
       },
       {
         "name": "Lena M. Carter",
         "rating": "4.8",
         "time": "1d ago",
-        "text": "The yoga sessions with instructor Mateo Rivera have transformed my flexibility and mindset. Highly recommend his calming approach.",
-        "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        "text":
+            "The yoga sessions with instructor Mateo Rivera have transformed my flexibility and mindset. Highly recommend his calming approach.",
+        "image":
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
       },
       {
         "name": "Ethan J. Wang",
         "rating": "4.6",
         "time": "5h ago",
-        "text": "Training with coach Aisha Khan has boosted my endurance significantly. The tailored cardio workouts keep me motivated every day.",
-        "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        "text":
+            "Training with coach Aisha Khan has boosted my endurance significantly. The tailored cardio workouts keep me motivated every day.",
+        "image":
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
       },
     ];
 
@@ -302,10 +372,20 @@ class TrainerDetailsScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Reviews", style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary)),
+              Text(
+                "Reviews",
+                style: AppTextStyles.base16Medium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
               GestureDetector(
                 onTap: () => Get.toNamed(AppRoutes.trainerReviewsScreen),
-                child: Text("See all", style: AppTextStyles.sm14Medium.copyWith(color: AppColors.actionPrimary)),
+                child: Text(
+                  "See all",
+                  style: AppTextStyles.sm14Medium.copyWith(
+                    color: AppColors.actionPrimary,
+                  ),
+                ),
               ),
             ],
           ),
@@ -347,13 +427,20 @@ class TrainerDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Personal Bio", style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary)),
+            Text(
+              "Personal Bio",
+              style: AppTextStyles.base16Medium.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
             SizedBox(height: 12.h),
             Text(
               bio != null && bio.isNotEmpty
                   ? bio
                   : "No personal bio added yet.",
-              style: AppTextStyles.sm14Regular.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.sm14Regular.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -377,7 +464,12 @@ class TrainerDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Location", style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary)),
+            Text(
+              "Location",
+              style: AppTextStyles.base16Medium.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
             SizedBox(height: 12.h),
             ClipRRect(
               borderRadius: BorderRadius.circular(24.r),
@@ -385,13 +477,11 @@ class TrainerDetailsScreen extends StatelessWidget {
                 height: 200.h,
                 width: double.infinity,
                 child: FlutterMap(
-                  options: MapOptions(
-                    initialCenter: point,
-                    initialZoom: 13.0,
-                  ),
+                  options: MapOptions(initialCenter: point, initialZoom: 13.0),
                   children: [
                     TileLayer(
-                      urlTemplate: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+                      urlTemplate:
+                          "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
                       subdomains: const ['a', 'b', 'c', 'd'],
                       userAgentPackageName: 'com.sparktech.herfitness',
                     ),
@@ -451,7 +541,9 @@ class TrainerDetailsScreen extends StatelessWidget {
               children: [
                 Text(
                   "Book now",
-                  style: AppTextStyles.base16Medium.copyWith(color: Colors.white),
+                  style: AppTextStyles.base16Medium.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
                 SizedBox(width: 8.w),
                 Icon(Icons.calendar_month, color: Colors.white, size: 20.sp),

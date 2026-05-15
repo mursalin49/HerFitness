@@ -4,6 +4,7 @@ import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/core/network/api_endpoints.dart';
 import 'package:fitness/core/storage/token_storage.dart';
 import 'package:fitness/models/auth_response_model.dart';
+import 'package:fitness/models/member_register_payload.dart';
 import 'package:fitness/models/trainer_register_payload.dart';
 
 class AuthService {
@@ -55,10 +56,12 @@ class AuthService {
     required String email,
     required String code,
   }) async {
-    return _apiClient.post(
+    final response = await _apiClient.post(
       ApiEndpoints.verifyEmail,
       body: {'email': email, 'code': code},
     );
+    await _savePossibleAuthResponse(response);
+    return response;
   }
 
   Future<dynamic> resendVerification({required String email}) async {
@@ -72,17 +75,36 @@ class AuthService {
     return _apiClient.post(ApiEndpoints.forgotPassword, body: {'email': email});
   }
 
-  Future<dynamic> resetPassword({
+  Future<String> verifyPasswordResetOtp({
     required String email,
-    required String code,
+    required String otp,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.verifyPasswordResetOtp,
+      body: {'email': email, 'otp': otp},
+    );
+
+    final resetKey = _extractString(response, const [
+      'resetKey',
+      'reset_key',
+      'token',
+    ]);
+    if (resetKey == null || resetKey.isEmpty) {
+      throw const ApiException('Reset key not found in server response');
+    }
+
+    return resetKey;
+  }
+
+  Future<dynamic> resetPassword({
+    required String resetKey,
     required String newPassword,
     required String confirmNewPassword,
   }) async {
     return _apiClient.post(
       ApiEndpoints.resetPassword,
       body: {
-        'email': email,
-        'code': code,
+        'resetKey': resetKey,
         'newPassword': newPassword,
         'confirmNewPassword': confirmNewPassword,
       },
@@ -107,17 +129,75 @@ class AuthService {
     return AuthResponseModel.fromJson(response as Map<String, dynamic>);
   }
 
+  Future<void> _savePossibleAuthResponse(dynamic response) async {
+    if (response is! Map<String, dynamic>) return;
+
+    final authResponse = AuthResponseModel.fromJson(response);
+    if (authResponse.accessToken.isEmpty && authResponse.user?.role == null) {
+      return;
+    }
+
+    await _saveAuthResponse(authResponse);
+  }
+
+  String? _extractString(dynamic response, List<String> keys) {
+    if (response is! Map<String, dynamic>) return null;
+
+    for (final key in keys) {
+      final value = response[key];
+      if (value != null && value.toString().isNotEmpty) {
+        return value.toString();
+      }
+    }
+
+    final data = response['data'];
+    if (data is Map<String, dynamic>) {
+      for (final key in keys) {
+        final value = data[key];
+        if (value != null && value.toString().isNotEmpty) {
+          return value.toString();
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Future<dynamic> registerMember(MemberRegisterPayload payload) async {
+    try {
+      _ensureFileExists(payload.imagePath, 'Profile image');
+      _ensureFileExists(payload.idCardFrontImagePath, 'ID card front image');
+      _ensureFileExists(payload.idCardBackImagePath, 'ID card back image');
+
+      final response = await _apiClient.multipartPost(
+        endpoint: ApiEndpoints.memberSignUp,
+        fields: payload.fields,
+        files: await payload.toMultipartFiles(),
+      );
+      await _savePossibleAuthResponse(response);
+      return response;
+    } on ApiException {
+      rethrow;
+    } on FileSystemException catch (error) {
+      throw ApiException(error.message);
+    } catch (error) {
+      throw ApiException(error.toString());
+    }
+  }
+
   Future<dynamic> registerTrainer(TrainerRegisterPayload payload) async {
     try {
       _ensureFileExists(payload.imagePath, 'Profile image');
       _ensureFileExists(payload.idCardFrontImagePath, 'ID card front image');
       _ensureFileExists(payload.idCardBackImagePath, 'ID card back image');
 
-      return _apiClient.multipartPost(
+      final response = await _apiClient.multipartPost(
         endpoint: ApiEndpoints.trainerSignUp,
         fields: payload.fields,
         files: await payload.toMultipartFiles(),
       );
+      await _savePossibleAuthResponse(response);
+      return response;
     } on ApiException {
       rethrow;
     } on FileSystemException catch (error) {

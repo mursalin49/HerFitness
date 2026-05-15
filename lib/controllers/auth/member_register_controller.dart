@@ -4,17 +4,12 @@ import 'package:fitness/Helpers/route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class TrainerRegisterController extends GetxController {
+class MemberRegisterController extends GetxController {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final stateController = TextEditingController();
   final locationController = TextEditingController();
-  final bioController = TextEditingController();
-  final classesTaughtController = TextEditingController();
-  final instructorExperienceController = TextEditingController();
-  final certificationsController = TextEditingController();
-  final classDeliveryModeController = TextEditingController(text: 'BOTH');
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
@@ -38,7 +33,7 @@ class TrainerRegisterController extends GetxController {
 
     Get.toNamed(
       AppRoutes.verifyIdentityScreen,
-      arguments: {'role': 'trainer', 'trainerRegisterDraft': _draft},
+      arguments: {'role': 'member', 'memberRegisterDraft': _draft},
     );
   }
 
@@ -58,25 +53,10 @@ class TrainerRegisterController extends GetxController {
       'phoneNumber': phoneController.text.trim(),
       'state': stateController.text.trim(),
       'location': locationController.text.trim(),
-      'bio': bioController.text.trim(),
-      'classesTaught': classesTaughtController.text.trim(),
-      'instructorExperience': instructorExperienceController.text.trim(),
-      'certifications': certificationsController.text.trim(),
-      'classDeliveryMode': _normalizedDeliveryMode,
       'password': passwordController.text,
       'confirmPassword': confirmPasswordController.text,
       'imagePath': imagePath.value!,
     };
-  }
-
-  String get _normalizedDeliveryMode {
-    final value = classDeliveryModeController.text.trim().toLowerCase();
-
-    if (value == 'online') return 'ONLINE';
-    if (value == 'in person' || value == 'in_person' || value == 'offline') {
-      return 'OFFLINE';
-    }
-    return 'BOTH';
   }
 
   String? _validate() {
@@ -86,11 +66,6 @@ class TrainerRegisterController extends GetxController {
       'phone number': phoneController.text,
       'state': stateController.text,
       'location': locationController.text,
-      'bio': bioController.text,
-      'classes taught': classesTaughtController.text,
-      'experience': instructorExperienceController.text,
-      'certifications': certificationsController.text,
-      'class delivery mode': classDeliveryModeController.text,
       'password': passwordController.text,
       'confirm password': confirmPasswordController.text,
     };
@@ -119,11 +94,6 @@ class TrainerRegisterController extends GetxController {
     phoneController.dispose();
     stateController.dispose();
     locationController.dispose();
-    bioController.dispose();
-    classesTaughtController.dispose();
-    instructorExperienceController.dispose();
-    certificationsController.dispose();
-    classDeliveryModeController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.onClose();

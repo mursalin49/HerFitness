@@ -1,3 +1,4 @@
+import 'package:fitness/controllers/member/member_profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
@@ -15,6 +16,15 @@ class MemberProfileScreen extends StatefulWidget {
 
 class _MemberProfileScreenState extends State<MemberProfileScreen> {
   int selectedYear = DateTime.now().year;
+  late final MemberProfileController _profileController;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileController = Get.isRegistered<MemberProfileController>()
+        ? Get.find<MemberProfileController>()
+        : Get.put(MemberProfileController());
+  }
 
   void _showYearPicker(BuildContext context) {
     showDialog(
@@ -47,58 +57,68 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                children: [
-                  SizedBox(height: 12.h),
-                  AppText(
-                    "Seraphina Dubois",
-                    style: AppTextStyles.xl20SemiBold.copyWith(color: AppColors.textPrimary),
-                  ),
-                  SizedBox(height: 8.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.location_on_outlined, size: 18, color: AppColors.textSecondary),
-                      SizedBox(width: 4.w),
-                      AppText(
-                        "Syracuse, Connecticut",
-                        style: AppTextStyles.sm14Medium.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w400,
-                        ),
+      body: Obx(
+        () => SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildHeader(context, _profileController.profileImageUrl),
+              if (_profileController.isLoading.value)
+                LinearProgressIndicator(color: AppColors.actionPrimary),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  children: [
+                    SizedBox(height: 12.h),
+                    AppText(
+                      _profileController.displayName,
+                      style: AppTextStyles.xl20SemiBold.copyWith(
+                        color: AppColors.textPrimary,
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 24.h),
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
+                        SizedBox(width: 4.w),
+                        AppText(
+                          _profileController.displayLocation,
+                          style: AppTextStyles.sm14Medium.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24.h),
 
-                  // ── Monthly Activity ──────────────────────────────────
-                  _buildMonthlyActivity(context),
-                  SizedBox(height: 32.h),
+                    // ── Monthly Activity ──────────────────────────────────
+                    _buildMonthlyActivity(context),
+                    SizedBox(height: 32.h),
 
-                  // ── Stats Row ─────────────────────────────────────────
-                  _buildStatsRow(),
-                  SizedBox(height: 24.h),
+                    // ── Stats Row ─────────────────────────────────────────
+                    _buildStatsRow(),
+                    SizedBox(height: 24.h),
 
-                  // ── Refer a Friend ────────────────────────────────────
-                  _buildReferFriendButton(),
+                    // ── Refer a Friend ────────────────────────────────────
+                    _buildReferFriendButton(),
 
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.19)
-                ],
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.19),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, String imageUrl) {
     return SizedBox(
       height: 235.h,
       child: Stack(
@@ -108,9 +128,14 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
             height: 190.h,
             width: double.infinity,
             decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(bottomRight: Radius.circular(30), bottomLeft: Radius.circular(30)),
+              borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(30),
+                bottomLeft: Radius.circular(30),
+              ),
               image: DecorationImage(
-                image: NetworkImage("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop"),
+                image: NetworkImage(
+                  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop",
+                ),
                 fit: BoxFit.cover,
               ),
             ),
@@ -123,10 +148,14 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _HeaderCircleButton(icon: Icons.arrow_back_ios_new_rounded, onTap: () => Get.back()),
+                _HeaderCircleButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () => Get.back(),
+                ),
                 _HeaderCircleButton(
                   icon: Icons.settings_outlined,
-                  onTap: () => Get.toNamed(AppRoutes.memberAccountSettingsScreen),
+                  onTap: () =>
+                      Get.toNamed(AppRoutes.memberAccountSettingsScreen),
                 ),
               ],
             ),
@@ -141,11 +170,20 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(color: Colors.white, width: 4),
-                image: const DecorationImage(
-                  image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                  fit: BoxFit.cover,
-                ),
+                image: imageUrl.isEmpty
+                    ? null
+                    : DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.cover,
+                      ),
               ),
+              child: imageUrl.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      color: AppColors.textSecondary,
+                      size: 40.w,
+                    )
+                  : null,
             ),
           ),
         ],
@@ -168,25 +206,40 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
             children: [
               AppText(
                 "Monthly Activity",
-                style: AppTextStyles.base16SemiBold.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.base16SemiBold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
               GestureDetector(
                 onTap: () => _showYearPicker(context),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_month_outlined, size: 16, color: AppColors.textSecondary),
+                      Icon(
+                        Icons.calendar_month_outlined,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
                       SizedBox(width: 8.w),
                       AppText(
                         "$selectedYear",
-                        style: AppTextStyles.xs12Regular.copyWith(color: AppColors.textPrimary),
+                        style: AppTextStyles.xs12Regular.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                      Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.textSecondary),
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
                     ],
                   ),
                 ),
@@ -202,13 +255,17 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
               children: [
                 // Y-Axis Labels
                 Padding(
-                  padding: EdgeInsets.only(bottom: 24.h), // Align with chart area
+                  padding: EdgeInsets.only(
+                    bottom: 24.h,
+                  ), // Align with chart area
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: ["100", "90", "80", "70", "60"].map((label) {
                       return AppText(
                         label,
-                        style: AppTextStyles.xs12Regular.copyWith(color: const Color(0xFF828282)),
+                        style: AppTextStyles.xs12Regular.copyWith(
+                          color: const Color(0xFF828282),
+                        ),
                       );
                     }).toList(),
                   ),
@@ -224,7 +281,10 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             // Grid Lines (Horizontal)
                             Column(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate(5, (index) => _DashedGridLine()),
+                              children: List.generate(
+                                5,
+                                (index) => _DashedGridLine(),
+                              ),
                             ),
                             // Bars Area (12 months)
                             Padding(
@@ -275,17 +335,33 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
   Widget _buildMonthlyLabels() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((mon) {
-        return SizedBox(
-          width: 14.w,
-          child: Center(
-            child: AppText(
-              mon.substring(0, 1), // J, F, M...
-              style: AppTextStyles.xs12Regular.copyWith(color: const Color(0xFF828282)),
-            ),
-          ),
-        );
-      }).toList(),
+      children:
+          [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ].map((mon) {
+            return SizedBox(
+              width: 14.w,
+              child: Center(
+                child: AppText(
+                  mon.substring(0, 1), // J, F, M...
+                  style: AppTextStyles.xs12Regular.copyWith(
+                    color: const Color(0xFF828282),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 
@@ -344,7 +420,9 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
             isSmallValue
                 ? AppText(
                     value,
-                    style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary),
+                    style: AppTextStyles.base16Medium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   )
@@ -353,14 +431,19 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                     children: [
                       AppText(
                         value,
-                        style: AppTextStyles.xl20Bold.copyWith(color: AppColors.textPrimary, fontSize: 24.sp),
+                        style: AppTextStyles.xl20Bold.copyWith(
+                          color: AppColors.textPrimary,
+                          fontSize: 24.sp,
+                        ),
                       ),
                       SizedBox(width: 4.w),
                       Padding(
                         padding: EdgeInsets.only(bottom: 4.h),
                         child: AppText(
                           unit,
-                          style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                          style: AppTextStyles.sm14Medium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     ],
@@ -368,7 +451,9 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
             SizedBox(height: 8.h),
             AppText(
               label,
-              style: AppTextStyles.xs12Regular.copyWith(color: AppColors.textTertiary),
+              style: AppTextStyles.xs12Regular.copyWith(
+                color: AppColors.textTertiary,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -401,16 +486,26 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                 ),
               ],
             ),
-            child: Icon(Icons.share_outlined, color: const Color(0xFF0284C7), size: 20.sp),
+            child: Icon(
+              Icons.share_outlined,
+              color: const Color(0xFF0284C7),
+              size: 20.sp,
+            ),
           ),
           SizedBox(width: 16.w),
           Expanded(
             child: AppText(
               "Refer a Friend",
-              style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary),
+              style: AppTextStyles.base16Medium.copyWith(
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
-          Icon(Icons.arrow_forward_ios_rounded, color: AppColors.textPrimary, size: 16.sp),
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: AppColors.textPrimary,
+            size: 16.sp,
+          ),
         ],
       ),
     );
@@ -421,10 +516,7 @@ class _HeaderCircleButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const _HeaderCircleButton({
-    required this.icon,
-    required this.onTap,
-  });
+  const _HeaderCircleButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -449,9 +541,7 @@ class _HeaderCircleButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Center(
-          child: Icon(icon, size: 20, color: Colors.black),
-        ),
+        child: Center(child: Icon(icon, size: 20, color: Colors.black)),
       ),
     );
   }
