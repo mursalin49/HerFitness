@@ -731,6 +731,7 @@ class IdentityReviewScreen extends StatelessWidget {
             'flow': 'signup',
             'role': 'trainer',
             'email': trainerDraft['email'] ?? '',
+            'password': trainerDraft['password'] ?? '',
             'nextRoute': AppRoutes.trainerBottomNavScreen,
             'backLabel': 'Back to Login',
           },
@@ -766,7 +767,8 @@ class IdentityReviewScreen extends StatelessWidget {
             'flow': 'signup',
             'role': 'member',
             'email': memberDraft['email'] ?? '',
-            'nextRoute': AppRoutes.memberBottomNavScreen,
+            'password': memberDraft['password'] ?? '',
+            'nextRoute': AppRoutes.assessmentNumberOneScreen,
             'backLabel': 'Back to Login',
           },
         );

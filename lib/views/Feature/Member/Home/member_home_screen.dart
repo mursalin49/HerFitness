@@ -39,9 +39,11 @@ class MemberHomeScreen extends StatelessWidget {
                   SizedBox(height: 16.h),
                   _buildNextWorkoutCard(),
                   SizedBox(height: 32.h),
-                  _buildSectionHeader(
-                    "Nearby Trainer",
-                    () => Get.toNamed(AppRoutes.trainerListScreen),
+                  Obx(
+                    () => _buildSectionHeader(
+                      controller.trainerSectionTitle,
+                      () => Get.toNamed(AppRoutes.trainerListScreen),
+                    ),
                   ),
                   SizedBox(height: 16.h),
                   _buildTrainerList(),
@@ -86,7 +88,7 @@ class MemberHomeScreen extends StatelessWidget {
                 height: 48.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   border: Border.all(color: Colors.white, width: 2),
                   image: imageUrl.isEmpty
                       ? null
@@ -109,7 +111,7 @@ class MemberHomeScreen extends StatelessWidget {
                   AppText(
                     "Welcome back",
                     style: AppTextStyles.xs12Regular.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                   AppText(
@@ -129,7 +131,7 @@ class MemberHomeScreen extends StatelessWidget {
                 height: 48.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                 ),
                 child: Center(
                   child: SvgPicture.asset(
@@ -302,7 +304,7 @@ class MemberHomeScreen extends StatelessWidget {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 24.h),
           child: Text(
-            "No nearby trainers found.",
+            controller.emptyTrainerMessage,
             style: AppTextStyles.sm14Medium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -391,7 +393,7 @@ class MemberHomeScreen extends StatelessWidget {
                             offset: const Offset(0, 3),
                           ),
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),

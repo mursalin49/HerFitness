@@ -14,6 +14,7 @@ class ApiEndpoints {
   static const identityVerification = '/identity-verification';
   static const users = '/api/users';
   static const currentUser = '/api/users/me';
+  static const memberAssessment = '/api/users/member-assessment';
   static const trainerClasses = '/api/trainer/classes';
   static String trainerClassById(String id) => '/api/trainer/classes/$id';
   static const memberClasses = '/api/member/classes';

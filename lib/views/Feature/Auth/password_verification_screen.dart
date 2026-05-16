@@ -70,10 +70,15 @@ class _PasswordVerificationScreenState
       await _authService.verifyEmail(email: email, code: currentCode);
 
       if (_nextRoute.isNotEmpty) {
-        final accessToken = await _tokenStorage.getAccessToken();
-        if (accessToken != null && accessToken.isNotEmpty) {
+        final hasSession = await _ensureSessionAfterSignup(email);
+        if (hasSession) {
           Get.offAllNamed(_nextRoute);
         } else {
+          Get.snackbar(
+            'Email verified',
+            'Please sign in to continue.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
           Get.offAllNamed(AppRoutes.signInScreen);
         }
         return;
@@ -168,6 +173,14 @@ class _PasswordVerificationScreenState
     return '';
   }
 
+  String get _password {
+    final args = Get.arguments;
+    if (args is Map && args['password'] is String) {
+      return args['password'] as String;
+    }
+    return '';
+  }
+
   String get _title {
     if (_isForgotPasswordFlow) {
       return 'Password Reset Sent';
@@ -224,6 +237,25 @@ class _PasswordVerificationScreenState
     }
 
     return identityArgs;
+  }
+
+  Future<bool> _ensureSessionAfterSignup(String email) async {
+    final accessToken = await _tokenStorage.getAccessToken();
+    if (accessToken != null && accessToken.isNotEmpty) {
+      return true;
+    }
+
+    final password = _password;
+    if (!_isForgotPasswordFlow && email.isNotEmpty && password.isNotEmpty) {
+      try {
+        await _authService.signIn(username: email, password: password);
+        return true;
+      } catch (error) {
+        debugPrint('Auto sign in after email verification failed: $error');
+      }
+    }
+
+    return false;
   }
 
   void _backToPreviousFlow() {

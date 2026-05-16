@@ -174,20 +174,48 @@ class ApiClient {
 
   String _extractErrorMessage(dynamic body) {
     if (body is Map<String, dynamic>) {
-      final message = body['message'] ?? body['error'];
+      final detailedError = _extractDetailedError(body['errors']);
+      if (detailedError != null) return detailedError;
+
+      final dataError = body['data'] is Map<String, dynamic>
+          ? _extractDetailedError(
+              (body['data'] as Map<String, dynamic>)['errors'],
+            )
+          : null;
+      if (dataError != null) return dataError;
+
+      final message = body['message'];
+      if (message is List && message.isNotEmpty) {
+        return message.first.toString();
+      }
       if (message != null) return message.toString();
 
-      final errors = body['errors'];
-      if (errors is Map && errors.isNotEmpty) {
-        final firstError = errors.values.first;
-        if (firstError is List && firstError.isNotEmpty) {
-          return firstError.first.toString();
-        }
-        return firstError.toString();
-      }
+      final error = body['error'];
+      if (error != null) return error.toString();
     }
 
     return 'Something went wrong. Please try again.';
+  }
+
+  String? _extractDetailedError(dynamic errors) {
+    if (errors is Map && errors.isNotEmpty) {
+      final firstError = errors.values.first;
+      if (firstError is List && firstError.isNotEmpty) {
+        return firstError.first.toString();
+      }
+      return firstError.toString();
+    }
+
+    if (errors is List && errors.isNotEmpty) {
+      final firstError = errors.first;
+      if (firstError is Map) {
+        final message = firstError['message'] ?? firstError['error'];
+        if (message != null) return message.toString();
+      }
+      return firstError.toString();
+    }
+
+    return null;
   }
 }
 

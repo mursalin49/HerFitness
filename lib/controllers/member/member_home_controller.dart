@@ -27,8 +27,8 @@ class MemberHomeController extends GetxController {
       "subtitle": "5 Series Workout",
       "date": "10-04-2026",
       "duration": "30min",
-      "image": "assets/images/yoga_flow.png"
-    }
+      "image": "assets/images/yoga_flow.png",
+    },
   ].obs;
 
   final trainers = <Map<String, dynamic>>[].obs;
@@ -43,23 +43,28 @@ class MemberHomeController extends GetxController {
   final List<Map<String, String>> banners = [
     {
       "title": "New features or\nevents in the gym",
-      "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop"
+      "image":
+          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop",
     },
     {
       "title": "Join our Yoga\nWeekend Retreat",
-      "image": "https://bookretreats.com/cdn-cgi/image/width=1200,quality=65,f=auto,sharpen=1,fit=cover,gravity=auto/assets/photo/retreat/0m/34k/34873/p_1148701/1000_1692669332.jpg"
+      "image":
+          "https://bookretreats.com/cdn-cgi/image/width=1200,quality=65,f=auto,sharpen=1,fit=cover,gravity=auto/assets/photo/retreat/0m/34k/34873/p_1148701/1000_1692669332.jpg",
     },
     {
       "title": "Limited Time: 20%\nOff Annual Pass",
-      "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop"
+      "image":
+          "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop",
     },
     {
       "title": "Free Personal\nTraining Session",
-      "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=600&auto=format&fit=crop"
+      "image":
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=600&auto=format&fit=crop",
     },
     {
       "title": "Unlock Your Potential\nwith Our Trainers",
-      "image": "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=600&auto=format&fit=crop"
+      "image":
+          "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=600&auto=format&fit=crop",
     },
   ];
 
@@ -69,7 +74,7 @@ class MemberHomeController extends GetxController {
   void onInit() {
     super.onInit();
     _startBannerTimer();
-    fetchNearbyTrainers();
+    fetchAllTrainers();
   }
 
   void _startBannerTimer() {
@@ -92,10 +97,66 @@ class MemberHomeController extends GetxController {
     super.onClose();
   }
 
+  String get trainerSectionTitle {
+    final category = selectedCategory.value;
+    if (category == "All") {
+      return "All Trainers";
+    }
+    if (category == "Nearby") {
+      return "Nearby Trainer";
+    }
+    return "$category Trainer";
+  }
+
+  String get emptyTrainerMessage {
+    final category = selectedCategory.value;
+    if (category == "All") {
+      return "No trainers found.";
+    }
+    if (category == "Nearby") {
+      return "No nearby trainers found.";
+    }
+    return "No $category trainers found.";
+  }
+
   void setCategory(String category) {
     selectedCategory.value = category;
-    if ((category == "All" || category == "Nearby") && trainers.isEmpty) {
-      fetchNearbyTrainers();
+    if (category == "All") {
+      fetchAllTrainers(showError: true);
+      return;
+    }
+
+    if (category == "Nearby") {
+      fetchNearbyTrainers(showError: true);
+      return;
+    }
+
+    fetchTrainersBySpecialty(category, showError: true);
+  }
+
+  Future<void> fetchAllTrainers({bool showError = false}) async {
+    try {
+      isLoadingTrainers.value = true;
+      final response = await _locationService.searchTrainers();
+      trainers.assignAll(response.map((item) => item.toUiMap()));
+    } on ApiException catch (error) {
+      if (showError) {
+        Get.snackbar(
+          'Trainers failed',
+          error.message,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      if (showError) {
+        Get.snackbar(
+          'Trainers failed',
+          'Could not load trainers.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } finally {
+      isLoadingTrainers.value = false;
     }
   }
 
@@ -131,6 +192,37 @@ class MemberHomeController extends GetxController {
         Get.snackbar(
           'Nearby trainers failed',
           'Could not load nearby trainers.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } finally {
+      isLoadingTrainers.value = false;
+    }
+  }
+
+  Future<void> fetchTrainersBySpecialty(
+    String specialty, {
+    bool showError = false,
+  }) async {
+    try {
+      isLoadingTrainers.value = true;
+      final response = await _locationService.searchTrainers(
+        specialty: specialty,
+      );
+      trainers.assignAll(response.map((item) => item.toUiMap()));
+    } on ApiException catch (error) {
+      if (showError) {
+        Get.snackbar(
+          'Trainer search failed',
+          error.message,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      if (showError) {
+        Get.snackbar(
+          'Trainer search failed',
+          'Could not load $specialty trainers.',
           snackPosition: SnackPosition.BOTTOM,
         );
       }

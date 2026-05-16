@@ -38,7 +38,26 @@ Every new endpoint should be added to `ApiEndpoints` first, then consumed throug
 Notes:
 - Login role is normalized from `roles`, `role`, `userRole`, `trainerProfile`, or `memberProfile`.
 - Current image parser supports `profileImageUrl`, `imageUrl`, `profileImage`, `profile_picture`, `avatar`, and related snake_case variants.
+- Signup email verification now carries the signup password only in route arguments so the app can auto sign in if `/api/auth/verify-email` verifies the user but does not return tokens.
 - Social login is not integrated yet. Backend needs a social auth endpoint before Flutter can finish Google/Facebook/Apple login.
+
+### Signup Routing
+
+Member and trainer signup intentionally diverge after email verification:
+
+| Role | Flow After Signup Form | OTP Success Route | Notes |
+| --- | --- | --- | --- |
+| Member | Identity verification -> `POST /api/auth/register` -> email OTP | `AppRoutes.assessmentNumberOneScreen` | Assessment is a one-time signup step before member home. |
+| Trainer | Identity verification -> `POST /api/auth/register/trainer` -> email OTP | `AppRoutes.trainerBottomNavScreen` | Trainer goes directly to trainer home after verification. |
+
+Implementation details:
+- `IdentityReviewScreen` passes `nextRoute` to `PasswordVerificationScreen`.
+- Member signup passes `AppRoutes.assessmentNumberOneScreen`.
+- Trainer signup passes `AppRoutes.trainerBottomNavScreen`.
+- `PasswordVerificationScreen` calls `AuthService.verifyEmail`.
+- If tokens are already saved from verify/register response, the app follows `nextRoute`.
+- If tokens are missing, the screen auto signs in using the signup email/password, then follows `nextRoute`.
+- Existing login still routes directly by role: member -> member home, trainer -> trainer home. Assessment is not shown on normal login.
 
 ## User Profile
 
@@ -57,8 +76,20 @@ Profile image behavior:
 
 | Flow | Endpoint | Flutter Files | Status |
 | --- | --- | --- | --- |
-| Get assessment | `GET /api/users/member-assessment` | Not fully wired | Pending |
-| Update assessment | `PUT /api/users/member-assessment` | Not fully wired | Pending |
+| Get assessment | `GET /api/users/member-assessment` | `MemberAssessmentService.getAssessment` | Service ready |
+| Update assessment | `PUT /api/users/member-assessment` | `MemberAssessmentService.updateAssessment`, `AssessmentController`, assessment signup flow | Integrated |
+
+Assessment values are sent with backend enum codes from Swagger, for example `LOSE_WEIGHT`, `KG`, `PLANT_BASED_VEGAN`, `KCAL`, and `EXCELLENT`.
+
+Current member signup assessment flow:
+
+1. Email OTP verification succeeds.
+2. Member is routed to assessment screen `1 of 10`.
+3. Final assessment screen calls `AssessmentController.submitAssessment()`.
+4. App sends `PUT /api/users/member-assessment`.
+5. On success, app navigates to `AppRoutes.memberBottomNavScreen`.
+
+Assessment API requires an authenticated member session. `PasswordVerificationScreen` ensures a session exists before opening assessment.
 
 ## Trainer Classes And Member Bookings
 
@@ -94,10 +125,15 @@ Backend needs final request/response contracts for these rules before Flutter ca
 | Update online status | `PUT /api/location/trainer/status` | `LocationService`, `TrainerLocationController` | Integrated |
 | Save member location | `POST /api/location/member` | `LocationService`, member home/list controllers | Integrated |
 | Nearby trainers | `GET /api/trainers/nearby` | `LocationService`, `MemberHomeController`, `TrainerListController` | Integrated |
-| Search trainers | `GET /api/trainers/search` | `LocationService`, `TrainerListController` | Integrated |
+| Search trainers | `GET /api/trainers/search` | `LocationService`, `MemberHomeController`, `TrainerListController` | Integrated |
 | Trainer profile | `GET /api/trainers/{id}` | `LocationService`, `TrainerDetailsController`, `TrainerProfileModel` | Integrated |
 
 Chat uses `trainerUserId`, so trainer list/detail models preserve this field separately from display profile id when available.
+
+Member home trainer tabs:
+- `All` uses `GET /api/trainers/search` without filters.
+- `Nearby` saves member location with `POST /api/location/member`, then calls `GET /api/trainers/nearby?lat={lat}&lng={lng}&radiusKm=10`.
+- Specialty chips such as `Yoga`, `Pilates`, `Strength`, and `Cardio` call `GET /api/trainers/search?specialty={specialty}`.
 
 ## Chat
 
@@ -139,8 +175,12 @@ Ask backend for these before implementing more Flutter work:
 ## QA Checklist
 
 - Login as trainer and member, confirm role-based routing.
-- Signup with profile image, verify email, then confirm `/api/users/me` shows `profileImageUrl`.
+- Signup as member with profile image and identity photos, verify email, confirm assessment screen opens before member home.
+- Complete member assessment, confirm `PUT /api/users/member-assessment` succeeds and app lands on member home.
+- Signup as trainer with profile image and identity photos, verify email, confirm trainer home opens directly.
+- After signup verification, confirm `/api/users/me` shows `profileImageUrl`.
 - Check profile image on home/profile/personal info screens.
+- Member home `All`, `Nearby`, and specialty trainer filters load from trainer APIs.
 - Member opens trainer details, taps chat, sends message.
 - Trainer opens Messages tab and sees conversation/message.
 - Trainer creates, updates, and deletes a class.

@@ -15,6 +15,8 @@ class CustomTextField extends StatefulWidget {
   final Color? suffixIconColor;
   final String? labelText;
   final String? hintText;
+  final TextStyle? textStyle;
+  final TextStyle? hintStyle;
   final double? contentPaddingHorizontal;
   final double? contentPaddingVertical;
   final FormFieldValidator<String>? validator;
@@ -39,6 +41,8 @@ class CustomTextField extends StatefulWidget {
     this.suffixIconColor,
     this.labelText,
     this.hintText,
+    this.textStyle,
+    this.hintStyle,
     this.contentPaddingHorizontal,
     this.contentPaddingVertical,
     this.validator,
@@ -78,7 +82,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return null;
   }
 
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -95,24 +98,28 @@ class _CustomTextFieldState extends State<CustomTextField> {
       obscuringCharacter: widget.obscure,
       enabled: widget.enabled ?? true,
       autovalidateMode: widget.autovalidateMode ?? AutovalidateMode.disabled,
-      validator: widget.validator ??
-              (value) {
+      validator:
+          widget.validator ??
+          (value) {
             if (value == null || value.isEmpty) {
               return "Please enter ${widget.hintText?.toLowerCase() ?? 'this field'}";
             }
             if (widget.isEmail == true) {
               final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-              if (!emailRegex.hasMatch(value)) return "Please enter a valid email";
+              if (!emailRegex.hasMatch(value))
+                return "Please enter a valid email";
             }
             return null;
           },
       onChanged: widget.onChanged,
       cursorColor: isDark ? AppColors.DarkThemeText : AppColors.DarkBlue,
-      style: TextStyle(
-        color: isDark ? AppColors.DarkThemeText : AppColors.DarkBlue,
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
+      style:
+          widget.textStyle ??
+          TextStyle(
+            color: isDark ? AppColors.DarkThemeText : AppColors.DarkBlue,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
@@ -125,35 +132,29 @@ class _CustomTextFieldState extends State<CustomTextField> {
         prefixIcon: _buildIcon(widget.prefixIcon, color: prefixColor),
         suffixIcon: widget.isPassword
             ? GestureDetector(
-          onTap: toggle,
-          child: _buildIcon(
-            obscureText ? AppIcons.hide : AppIcons.show,
-            size: 16,
-            color: suffixColor,
-          ),
-        )
+                onTap: toggle,
+                child: _buildIcon(
+                  obscureText ? AppIcons.hide : AppIcons.show,
+                  size: 16,
+                  color: suffixColor,
+                ),
+              )
             : _buildIcon(widget.suffixIcon, color: suffixColor),
 
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
-            color:  Colors.grey.shade400,
-            width: 1,
-          ),
+          borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
-            color: AppColors.actionPrimary,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: AppColors.actionPrimary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
           borderSide: BorderSide(
             color: isDark
                 ? AppColors.Red.withValues(alpha: 0.30)
-                : AppColors.Red
+                : AppColors.Red,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
@@ -165,11 +166,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
             width: 1.1,
           ),
         ),
-        hintStyle: TextStyle(
-          color: Color(0xFF454F5B),
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-        ),
+        hintStyle:
+            widget.hintStyle ??
+            const TextStyle(
+              color: Color(0xFF454F5B),
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+            ),
       ),
     );
   }
