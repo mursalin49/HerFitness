@@ -18,53 +18,128 @@ class ChatScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      body: Stack(
         children: [
-          _buildAppBar(controller),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoadingMessages.value &&
-                  controller.messages.isEmpty) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.actionPrimary,
-                  ),
-                );
-              }
+          _buildTopGradient(context),
+          Column(
+            children: [
+              _buildAppBar(controller),
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoadingMessages.value &&
+                      controller.messages.isEmpty) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.actionPrimary,
+                      ),
+                    );
+                  }
 
-              if (controller.messages.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No messages yet.',
-                    style: AppTextStyles.sm14Medium.copyWith(
-                      color: AppColors.textSecondary,
+                  if (controller.messages.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No messages yet.',
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 24.h,
                     ),
-                  ),
-                );
-              }
+                    itemCount: controller.messages.length,
+                    itemBuilder: (context, index) {
+                      final message = controller.messages[index];
+                      bool showTimeDivider =
+                          index == 0 ||
+                          controller.messages[index].time !=
+                              controller.messages[index - 1].time;
 
-              return ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
-                itemCount: controller.messages.length,
-                itemBuilder: (context, index) {
-                  final message = controller.messages[index];
-                  bool showTimeDivider =
-                      index == 0 ||
-                      controller.messages[index].time !=
-                          controller.messages[index - 1].time;
-
-                  return Column(
-                    children: [
-                      if (showTimeDivider) _buildTimeDivider(message.time),
-                      _buildMessageBubble(message),
-                    ],
+                      return Column(
+                        children: [
+                          if (showTimeDivider) _buildTimeDivider(message.time),
+                          _buildMessageBubble(message),
+                        ],
+                      );
+                    },
                   );
-                },
-              );
-            }),
+                }),
+              ),
+              _buildMessageInput(controller),
+            ],
           ),
-          _buildMessageInput(controller),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTopGradient(BuildContext context) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: MediaQuery.of(context).padding.top + 180.h,
+      child: IgnorePointer(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFFFFDADF).withValues(alpha: 0.9),
+                    const Color(0xFFFFECEE).withValues(alpha: 0.8),
+                    const Color(0xFFFFF7F5).withValues(alpha: 0.58),
+                    Colors.white.withValues(alpha: 0),
+                  ],
+                  stops: const [0, 0.46, 0.78, 1],
+                ),
+              ),
+            ),
+            Positioned(
+              left: -78.w,
+              top: -38.h,
+              width: 220.w,
+              height: 220.w,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFFFBECB).withValues(alpha: 0.5),
+                      const Color(0xFFFFDDE4).withValues(alpha: 0.26),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.48, 1],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -76.w,
+              top: -26.h,
+              width: 230.w,
+              height: 230.w,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFFFC1CF).withValues(alpha: 0.45),
+                      const Color(0xFFFFE1E7).withValues(alpha: 0.22),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.5, 1],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -76,13 +151,6 @@ class ChatScreen extends StatelessWidget {
         bottom: 20.h,
         left: 20.w,
         right: 20.w,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.actionPrimary,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32.r),
-          bottomRight: Radius.circular(32.r),
-        ),
       ),
       child: Row(
         children: [
@@ -111,7 +179,9 @@ class ChatScreen extends StatelessWidget {
               return Text(
                 selected?.name ?? contact.name,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.base16Medium.copyWith(color: Colors.white),
+                style: AppTextStyles.base16Medium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               );
             }),
           ),

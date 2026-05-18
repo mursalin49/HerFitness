@@ -21,23 +21,7 @@ class MessagesListScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Background Gradient (to match other screens)
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(1.0, -1.0),
-                radius: 2.5,
-                colors: [
-                  const Color(0xFFFFA6B4).withValues(alpha: 0.5),
-                  const Color(0xFFFFE0B9).withValues(alpha: 0.25),
-                  Colors.white,
-                ],
-                stops: const [0.0, 0.7, 1.0],
-              ),
-            ),
-          ),
+          _buildTopGradient(context),
           SafeArea(
             child: Column(
               children: [
@@ -123,6 +107,73 @@ class MessagesListScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTopGradient(BuildContext context) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: MediaQuery.of(context).padding.top + 250.h,
+      child: IgnorePointer(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFFFFDADF).withValues(alpha: 0.9),
+                    const Color(0xFFFFECEE).withValues(alpha: 0.8),
+                    const Color(0xFFFFF7F5).withValues(alpha: 0.58),
+                    Colors.white.withValues(alpha: 0),
+                  ],
+                  stops: const [0, 0.46, 0.78, 1],
+                ),
+              ),
+            ),
+            Positioned(
+              left: -78.w,
+              top: -38.h,
+              width: 220.w,
+              height: 220.w,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFFFBECB).withValues(alpha: 0.5),
+                      const Color(0xFFFFDDE4).withValues(alpha: 0.26),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.48, 1],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -76.w,
+              top: -26.h,
+              width: 230.w,
+              height: 230.w,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFFFC1CF).withValues(alpha: 0.45),
+                      const Color(0xFFFFE1E7).withValues(alpha: 0.22),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.5, 1],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -26,23 +26,7 @@ class TrainerListScreen extends StatelessWidget {
       backgroundColor: AppColors.bgPrimary,
       body: Stack(
         children: [
-          // Background Gradient
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(1.0, -1.0),
-                radius: 2.5,
-                colors: [
-                  const Color(0xFFFFA6B4).withOpacity(0.5),
-                  const Color(0xFFFFE0B9).withOpacity(0.25),
-                  Colors.white,
-                ],
-                stops: const [0.0, 0.7, 1.0],
-              ),
-            ),
-          ),
+          _buildTopGradient(context),
           SafeArea(
             child: Column(
               children: [
@@ -71,6 +55,73 @@ class TrainerListScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildTopGradient(BuildContext context) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: MediaQuery.of(context).padding.top + 250.h,
+      child: IgnorePointer(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFFFFDADF).withValues(alpha: 0.9),
+                    const Color(0xFFFFECEE).withValues(alpha: 0.8),
+                    const Color(0xFFFFF7F5).withValues(alpha: 0.58),
+                    Colors.white.withValues(alpha: 0),
+                  ],
+                  stops: const [0, 0.46, 0.78, 1],
+                ),
+              ),
+            ),
+            Positioned(
+              left: -78.w,
+              top: -38.h,
+              width: 220.w,
+              height: 220.w,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFFFBECB).withValues(alpha: 0.5),
+                      const Color(0xFFFFDDE4).withValues(alpha: 0.26),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.48, 1],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -76.w,
+              top: -26.h,
+              width: 230.w,
+              height: 230.w,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFFFC1CF).withValues(alpha: 0.45),
+                      const Color(0xFFFFE1E7).withValues(alpha: 0.22),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.5, 1],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabs() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w),
@@ -81,13 +132,13 @@ class TrainerListScreen extends StatelessWidget {
         border: Border.all(color: const Color(0xFFF2F2F2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             offset: const Offset(0, 1),
             blurRadius: 2,
             spreadRadius: -1,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             offset: const Offset(0, 1),
             blurRadius: 3,
             spreadRadius: 0,
@@ -101,8 +152,12 @@ class TrainerListScreen extends StatelessWidget {
             return AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              left: isNearYou ? 0 : (MediaQuery.of(Get.context!).size.width - 52.w) / 2,
-              right: isNearYou ? (MediaQuery.of(Get.context!).size.width - 52.w) / 2 : 0,
+              left: isNearYou
+                  ? 0
+                  : (MediaQuery.of(Get.context!).size.width - 52.w) / 2,
+              right: isNearYou
+                  ? (MediaQuery.of(Get.context!).size.width - 52.w) / 2
+                  : 0,
               top: 0,
               bottom: 0,
               child: Container(
@@ -113,12 +168,7 @@ class TrainerListScreen extends StatelessWidget {
               ),
             );
           }),
-          Row(
-            children: [
-              _buildTabItem("Near You"),
-              _buildTabItem("Search"),
-            ],
-          ),
+          Row(children: [_buildTabItem("Near You"), _buildTabItem("Search")]),
         ],
       ),
     );
@@ -157,13 +207,17 @@ class TrainerListScreen extends StatelessWidget {
             children: [
               Text(
                 "All Coaches",
-                style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.base16Medium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
               Row(
                 children: [
                   Text(
                     "Most Popular",
-                    style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textTertiary),
+                    style: AppTextStyles.sm14Medium.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
                   ),
                   SizedBox(width: 8.w),
                   SvgPicture.asset("assets/icons/radar.svg"),
@@ -178,16 +232,22 @@ class TrainerListScreen extends StatelessWidget {
             if (controller.isLoadingNearby.value &&
                 controller.nearbyTrainers.isEmpty) {
               return Center(
-                child: CircularProgressIndicator(color: AppColors.actionPrimary),
+                child: CircularProgressIndicator(
+                  color: AppColors.actionPrimary,
+                ),
               );
             }
 
             if (controller.nearbyTrainers.isEmpty) {
               return RefreshIndicator(
                 color: AppColors.actionPrimary,
-                onRefresh: () => controller.fetchNearbyTrainers(showError: true),
+                onRefresh: () =>
+                    controller.fetchNearbyTrainers(showError: true),
                 child: ListView(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 80.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 80.h,
+                  ),
                   children: [
                     Center(
                       child: Text(
@@ -249,7 +309,9 @@ class TrainerListScreen extends StatelessWidget {
                 children: [
                   Text(
                     "Most Popular",
-                    style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textTertiary),
+                    style: AppTextStyles.sm14Medium.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
                   ),
                   SizedBox(width: 8.w),
                   SvgPicture.asset("assets/icons/radar.svg"),
@@ -263,7 +325,9 @@ class TrainerListScreen extends StatelessWidget {
           child: Obx(() {
             if (controller.isLoadingSearch.value) {
               return Center(
-                child: CircularProgressIndicator(color: AppColors.actionPrimary),
+                child: CircularProgressIndicator(
+                  color: AppColors.actionPrimary,
+                ),
               );
             }
 
