@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class CreateClassBottomSheet extends StatefulWidget {
   const CreateClassBottomSheet({super.key});
@@ -108,8 +109,11 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
 
     setState(() {
       _selectedDateTime = DateTime(
-        pickedDate.year, pickedDate.month, pickedDate.day,
-        pickedTime.hour, pickedTime.minute,
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
       );
     });
   }
@@ -186,7 +190,7 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
   }
 
   void _showValidationError(String message) {
-    Get.snackbar(
+    showAppSnackbar(
       'Missing information',
       message,
       snackPosition: SnackPosition.BOTTOM,
@@ -208,7 +212,9 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -238,7 +244,9 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
                       children: [
                         AppText(
                           "Create New Class",
-                          style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary),
+                          style: AppTextStyles.base16Medium.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
 
                         GestureDetector(
@@ -263,7 +271,11 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
                               ],
                             ),
                             child: const Center(
-                              child: Icon(Icons.close, size: 20, color: Colors.black),
+                              child: Icon(
+                                Icons.close,
+                                size: 20,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),
@@ -299,7 +311,9 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
                           children: [
                             AppText(
                               _selectedDateTime != null
-                                  ? DateFormat("d MMM yyyy  hh:mm a").format(_selectedDateTime!)
+                                  ? DateFormat(
+                                      "d MMM yyyy  hh:mm a",
+                                    ).format(_selectedDateTime!)
                                   : "Pick a date & time",
                               style: AppTextStyles.base16Regular.copyWith(
                                 color: _selectedDateTime != null
@@ -307,7 +321,11 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
                                     : const Color(0xFF454F5B),
                               ),
                             ),
-                            Icon(Icons.calendar_month_outlined, size: 20, color: Colors.grey.shade500),
+                            Icon(
+                              Icons.calendar_month_outlined,
+                              size: 20,
+                              color: Colors.grey.shade500,
+                            ),
                           ],
                         ),
                       ),
@@ -328,7 +346,8 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
                                 hint: "Select type",
                                 value: _selectedType,
                                 items: _classTypes,
-                                onChanged: (v) => setState(() => _selectedType = v),
+                                onChanged: (v) =>
+                                    setState(() => _selectedType = v),
                               ),
                             ],
                           ),
@@ -407,7 +426,9 @@ class _CreateClassBottomSheetState extends State<CreateClassBottomSheet> {
                       ),
                     ),
 
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.030)
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.030,
+                    ),
                   ],
                 ),
               ),
@@ -463,21 +484,28 @@ class _DropdownField extends StatelessWidget {
           value: value,
           hint: Text(
             hint,
-            style: const TextStyle(color: Color(0xFF454F5B), fontSize: 15, fontWeight: FontWeight.w400),
+            style: const TextStyle(
+              color: Color(0xFF454F5B),
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+            ),
           ),
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey.shade600),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.grey.shade600,
+          ),
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 15,
             fontWeight: FontWeight.w500,
             fontFamily: 'WorkSans',
           ),
-          items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+          items: items
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
           onChanged: onChanged,
         ),
       ),
     );
   }
 }
-
-

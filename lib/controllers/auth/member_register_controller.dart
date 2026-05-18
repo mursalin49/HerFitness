@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fitness/Helpers/route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class MemberRegisterController extends GetxController {
   final nameController = TextEditingController();
@@ -23,7 +24,7 @@ class MemberRegisterController extends GetxController {
   void continueToIdentityVerification() {
     final validationMessage = _validate();
     if (validationMessage != null) {
-      Get.snackbar(
+      showAppSnackbar(
         'Registration incomplete',
         validationMessage,
         snackPosition: SnackPosition.BOTTOM,

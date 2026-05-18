@@ -1,6 +1,7 @@
 import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/services/location_service.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class TrainerListController extends GetxController {
   TrainerListController({LocationService? locationService})
@@ -14,6 +15,7 @@ class TrainerListController extends GetxController {
   final searchResults = <Map<String, dynamic>>[].obs;
   final isLoadingNearby = false.obs;
   final isLoadingSearch = false.obs;
+  final showBookmarkedOnly = false.obs;
 
   static const double defaultLat = 23.8103;
   static const double defaultLng = 90.4125;
@@ -31,10 +33,15 @@ class TrainerListController extends GetxController {
   }
 
   void setTab(String tab) {
+    showBookmarkedOnly.value = false;
     selectedTab.value = tab;
     if (tab == "Near You" && nearbyTrainers.isEmpty) {
       fetchNearbyTrainers();
     }
+  }
+
+  void toggleBookmarkedOnly() {
+    showBookmarkedOnly.toggle();
   }
 
   void onSearch(String query) {
@@ -62,7 +69,7 @@ class TrainerListController extends GetxController {
       nearbyTrainers.assignAll(response.map((item) => item.toUiMap()));
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Nearby trainers failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -70,7 +77,7 @@ class TrainerListController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Nearby trainers failed',
           'Could not load nearby trainers.',
           snackPosition: SnackPosition.BOTTOM,
@@ -94,7 +101,7 @@ class TrainerListController extends GetxController {
       searchResults.assignAll(response.map((item) => item.toUiMap()));
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainer search failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -102,7 +109,7 @@ class TrainerListController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainer search failed',
           'Could not search trainers.',
           snackPosition: SnackPosition.BOTTOM,

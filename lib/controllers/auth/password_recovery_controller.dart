@@ -3,6 +3,7 @@ import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class PasswordRecoveryController extends GetxController {
   PasswordRecoveryController({AuthService? authService})
@@ -23,7 +24,7 @@ class PasswordRecoveryController extends GetxController {
   Future<void> sendForgotPasswordCode() async {
     final email = _emailFromArgsOrController;
     if (email.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Email required',
         'Please enter your email address.',
         snackPosition: SnackPosition.BOTTOM,
@@ -39,13 +40,13 @@ class PasswordRecoveryController extends GetxController {
         arguments: {'flow': 'forgotPassword', 'email': email},
       );
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Reset failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Reset failed',
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -60,7 +61,7 @@ class PasswordRecoveryController extends GetxController {
     final currentCode = code.value.trim();
 
     if (email.isEmpty || currentCode.length != 6) {
-      Get.snackbar(
+      showAppSnackbar(
         'Invalid code',
         'Please enter the 6-digit code sent to your email.',
         snackPosition: SnackPosition.BOTTOM,
@@ -80,13 +81,13 @@ class PasswordRecoveryController extends GetxController {
         arguments: {'email': email, 'resetKey': key},
       );
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Verification failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Verification failed',
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -103,7 +104,7 @@ class PasswordRecoveryController extends GetxController {
     final confirmNewPassword = confirmPasswordController.text;
 
     if (email.isEmpty || currentResetKey.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Reset failed',
         'Email or reset key is missing.',
         snackPosition: SnackPosition.BOTTOM,
@@ -112,7 +113,7 @@ class PasswordRecoveryController extends GetxController {
     }
 
     if (newPassword.isEmpty || confirmNewPassword.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Password required',
         'Please enter and confirm your new password.',
         snackPosition: SnackPosition.BOTTOM,
@@ -121,7 +122,7 @@ class PasswordRecoveryController extends GetxController {
     }
 
     if (newPassword != confirmNewPassword) {
-      Get.snackbar(
+      showAppSnackbar(
         'Password mismatch',
         'New password and confirm password do not match.',
         snackPosition: SnackPosition.BOTTOM,
@@ -136,20 +137,20 @@ class PasswordRecoveryController extends GetxController {
         newPassword: newPassword,
         confirmNewPassword: confirmNewPassword,
       );
-      Get.snackbar(
+      showAppSnackbar(
         'Password updated',
         'Please sign in with your new password.',
         snackPosition: SnackPosition.BOTTOM,
       );
       Get.offAllNamed(AppRoutes.signInScreen);
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Reset failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Reset failed',
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,

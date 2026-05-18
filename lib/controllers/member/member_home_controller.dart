@@ -3,6 +3,7 @@ import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class MemberHomeController extends GetxController {
   MemberHomeController({LocationService? locationService})
@@ -141,7 +142,7 @@ class MemberHomeController extends GetxController {
       trainers.assignAll(response.map((item) => item.toUiMap()));
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainers failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -149,7 +150,7 @@ class MemberHomeController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainers failed',
           'Could not load trainers.',
           snackPosition: SnackPosition.BOTTOM,
@@ -181,7 +182,7 @@ class MemberHomeController extends GetxController {
       trainers.assignAll(response.map((item) => item.toUiMap()));
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Nearby trainers failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -189,7 +190,7 @@ class MemberHomeController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Nearby trainers failed',
           'Could not load nearby trainers.',
           snackPosition: SnackPosition.BOTTOM,
@@ -212,7 +213,7 @@ class MemberHomeController extends GetxController {
       trainers.assignAll(response.map((item) => item.toUiMap()));
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainer search failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -220,7 +221,7 @@ class MemberHomeController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainer search failed',
           'Could not load $specialty trainers.',
           snackPosition: SnackPosition.BOTTOM,

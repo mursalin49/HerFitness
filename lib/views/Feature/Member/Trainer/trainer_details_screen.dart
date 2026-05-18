@@ -1,13 +1,14 @@
-import 'package:fitness/controllers/common/chat_controller.dart';
+import 'package:fitness/controllers/member/trainer_bookmark_controller.dart';
 import 'package:fitness/controllers/member/trainer_details_controller.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/CustomAppbar/custom_appbar.dart';
-import 'package:fitness/views/Feature/common/chat/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../Helpers/route.dart';
+import 'trainer_chat_screen.dart';
 import 'widgets/review_card.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -19,6 +20,10 @@ class TrainerDetailsScreen extends StatelessWidget {
       Get.isRegistered<TrainerDetailsController>()
       ? Get.find<TrainerDetailsController>()
       : Get.put(TrainerDetailsController());
+  final TrainerBookmarkController bookmarkController =
+      Get.isRegistered<TrainerBookmarkController>()
+      ? Get.find<TrainerBookmarkController>()
+      : Get.put(TrainerBookmarkController());
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +107,21 @@ class TrainerDetailsScreen extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-              child: CustomAppbar(),
+              child: CustomAppbar(
+                trailing: Obx(() {
+                  final isBookmarked = bookmarkController.isBookmarked(trainer);
+                  return GestureDetector(
+                    onTap: () => bookmarkController.toggleTrainer(trainer),
+                    child: SvgPicture.asset(
+                      isBookmarked
+                          ? "assets/icons/befor_bookmark.svg"
+                          : "assets/icons/after_bookmark.svg",
+                      width: 52.w,
+                      height: 52.w,
+                    ),
+                  );
+                }),
+              ),
             ),
           ),
           // Bottom Text Info
@@ -145,7 +164,7 @@ class TrainerDetailsScreen extends StatelessWidget {
             right: 20.w,
             bottom: 30.h,
             child: GestureDetector(
-              onTap: () => _startTrainerChat(trainer),
+              onTap: _startTrainerChat,
               child: Container(
                 width: 56.w,
                 height: 56.w,
@@ -166,50 +185,8 @@ class TrainerDetailsScreen extends StatelessWidget {
     });
   }
 
-  Future<void> _startTrainerChat(Map<String, dynamic> trainer) async {
-    final trainerUserId =
-        trainer['trainerUserId']?.toString() ??
-        trainer['trainer_user_id']?.toString() ??
-        trainer['userId']?.toString() ??
-        trainer['user_id']?.toString() ??
-        trainer['id']?.toString();
-
-    if (trainerUserId == null || trainerUserId.isEmpty) {
-      Get.snackbar(
-        'Chat unavailable',
-        'Trainer user id is missing.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    final chatController = Get.isRegistered<ChatController>()
-        ? Get.find<ChatController>()
-        : Get.put(ChatController());
-    final contact = await chatController.startConversationWithTrainer(
-      trainerUserId: trainerUserId,
-      trainerName: trainer['name']?.toString(),
-      avatarUrl: trainer['imageUrl']?.toString(),
-    );
-
-    if (contact != null) {
-      Get.to(() => ChatScreen(contact: contact));
-    }
-  }
-
-  Widget _buildCircleButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 48.w,
-        height: 48.w,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: Colors.black, size: 20.sp),
-      ),
-    );
+  void _startTrainerChat() {
+    Get.to(() => const TrainerChatScreen());
   }
 
   Widget _buildSmallTag(IconData icon, String text) {

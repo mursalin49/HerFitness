@@ -1,6 +1,7 @@
 import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/services/member_assessment_service.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class AssessmentController extends GetxController {
   AssessmentController({MemberAssessmentService? assessmentService})
@@ -132,7 +133,7 @@ class AssessmentController extends GetxController {
   Future<bool> submitAssessment() async {
     final validationMessage = _validateSubmission();
     if (validationMessage != null) {
-      Get.snackbar(
+      showAppSnackbar(
         'Assessment incomplete',
         validationMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -145,14 +146,14 @@ class AssessmentController extends GetxController {
       await _assessmentService.updateAssessment(toRequestBody());
       return true;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Assessment failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
       return false;
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Assessment failed',
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,

@@ -143,6 +143,7 @@ class _ClassTypePicker extends StatelessWidget {
                 type,
                 style: AppTextStyles.xs12Medium.copyWith(
                   color: AppColors.textPrimary,
+                  fontSize: 15.sp,
                   letterSpacing: 0,
                 ),
               ),
@@ -165,6 +166,7 @@ class _ClassTypePicker extends StatelessWidget {
                   controller.selectedClassType.value,
                   style: AppTextStyles.xs12Regular.copyWith(
                     color: AppColors.textPrimary,
+                    fontSize: 15.sp,
                     letterSpacing: 0,
                   ),
                 ),

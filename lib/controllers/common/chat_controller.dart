@@ -7,6 +7,7 @@ import 'package:fitness/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class ChatMessage {
   final String id;
@@ -173,7 +174,7 @@ class ChatController extends GetxController {
       }
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Messages failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -181,7 +182,7 @@ class ChatController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Messages failed',
           'Could not load conversations.',
           snackPosition: SnackPosition.BOTTOM,
@@ -204,7 +205,7 @@ class ChatController extends GetxController {
     String? avatarUrl,
   }) async {
     if (trainerUserId.trim().isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Chat unavailable',
         'Trainer user id is missing.',
         snackPosition: SnackPosition.BOTTOM,
@@ -233,13 +234,13 @@ class ChatController extends GetxController {
       await fetchMessages(contact.id, showError: true);
       return contact;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Chat failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Chat failed',
         'Could not start the conversation.',
         snackPosition: SnackPosition.BOTTOM,
@@ -276,7 +277,7 @@ class ChatController extends GetxController {
       );
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Messages failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -284,7 +285,7 @@ class ChatController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Messages failed',
           'Could not load messages.',
           snackPosition: SnackPosition.BOTTOM,
@@ -323,14 +324,14 @@ class ChatController extends GetxController {
         ),
       );
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Message failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
       messageController.text = text;
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Message failed',
         'Could not send your message.',
         snackPosition: SnackPosition.BOTTOM,

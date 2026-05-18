@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class EditClassBottomSheet extends StatefulWidget {
   final int index;
@@ -57,16 +58,24 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _nameController     = TextEditingController(text: widget.initialName);
-    _durationController = TextEditingController(text: widget.initialDuration.toString());
-    _priceController    = TextEditingController(text: widget.initialPrice.toStringAsFixed(0));
+    _nameController = TextEditingController(text: widget.initialName);
+    _durationController = TextEditingController(
+      text: widget.initialDuration.toString(),
+    );
+    _priceController = TextEditingController(
+      text: widget.initialPrice.toStringAsFixed(0),
+    );
     _capacityController = TextEditingController(
       text: widget.initialSessionFormat.toLowerCase() == "group"
           ? widget.initialMaxMembers.toString()
           : "",
     );
-    _selectedType   = _classTypes.contains(widget.initialClassType) ? widget.initialClassType : null;
-    _selectedFormat = _sessionFormats.contains(widget.initialSessionFormat) ? widget.initialSessionFormat : null;
+    _selectedType = _classTypes.contains(widget.initialClassType)
+        ? widget.initialClassType
+        : null;
+    _selectedFormat = _sessionFormats.contains(widget.initialSessionFormat)
+        ? widget.initialSessionFormat
+        : null;
 
     if (widget.initialDateTime != null) {
       _selectedDateTime = widget.initialDateTime;
@@ -76,8 +85,11 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
     try {
       final parsed = DateFormat("hh:mm a").parse(widget.initialTime);
       _selectedDateTime = DateTime(
-        DateTime.now().year, DateTime.now().month, DateTime.now().day,
-        parsed.hour, parsed.minute,
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        parsed.hour,
+        parsed.minute,
       );
     } catch (_) {
       _selectedDateTime = null;
@@ -103,8 +115,15 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.light(primary: AppColors.actionPrimary),
           textTheme: Theme.of(context).textTheme.copyWith(
-            headlineMedium: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0),
-            headlineSmall:  const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            headlineMedium: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0,
+            ),
+            headlineSmall: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         child: child!,
@@ -115,7 +134,10 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: _selectedDateTime != null
-          ? TimeOfDay(hour: _selectedDateTime!.hour, minute: _selectedDateTime!.minute)
+          ? TimeOfDay(
+              hour: _selectedDateTime!.hour,
+              minute: _selectedDateTime!.minute,
+            )
           : TimeOfDay.now(),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
@@ -129,9 +151,19 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
             surface: Colors.white,
           ),
           textTheme: Theme.of(context).textTheme.copyWith(
-            displayLarge: const TextStyle(fontSize: 42, fontWeight: FontWeight.w600, letterSpacing: -1),
-            bodyLarge:    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            bodyMedium:   const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+            displayLarge: const TextStyle(
+              fontSize: 42,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -1,
+            ),
+            bodyLarge: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            bodyMedium: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
         child: child!,
@@ -141,8 +173,11 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
 
     setState(() {
       _selectedDateTime = DateTime(
-        pickedDate.year, pickedDate.month, pickedDate.day,
-        pickedTime.hour, pickedTime.minute,
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
       );
     });
   }
@@ -219,7 +254,7 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
   }
 
   void _showValidationError(String message) {
-    Get.snackbar(
+    showAppSnackbar(
       'Missing information',
       message,
       snackPosition: SnackPosition.BOTTOM,
@@ -241,7 +276,9 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -269,7 +306,9 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                       children: [
                         AppText(
                           "Edit Class",
-                          style: AppTextStyles.base16Medium.copyWith(color: AppColors.textPrimary),
+                          style: AppTextStyles.base16Medium.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
@@ -293,7 +332,11 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                               ],
                             ),
                             child: const Center(
-                              child: Icon(Icons.close, size: 20, color: Colors.black),
+                              child: Icon(
+                                Icons.close,
+                                size: 20,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),
@@ -325,7 +368,9 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                           children: [
                             AppText(
                               _selectedDateTime != null
-                                  ? DateFormat("d MMM yyyy  hh:mm a").format(_selectedDateTime!)
+                                  ? DateFormat(
+                                      "d MMM yyyy  hh:mm a",
+                                    ).format(_selectedDateTime!)
                                   : "Pick a date & time",
                               style: AppTextStyles.base16Regular.copyWith(
                                 color: _selectedDateTime != null
@@ -333,7 +378,11 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                                     : const Color(0xFF454F5B),
                               ),
                             ),
-                            Icon(Icons.calendar_month_outlined, size: 20, color: Colors.grey.shade500),
+                            Icon(
+                              Icons.calendar_month_outlined,
+                              size: 20,
+                              color: Colors.grey.shade500,
+                            ),
                           ],
                         ),
                       ),
@@ -352,7 +401,8 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                                 hint: "Select type",
                                 value: _selectedType,
                                 items: _classTypes,
-                                onChanged: (v) => setState(() => _selectedType = v),
+                                onChanged: (v) =>
+                                    setState(() => _selectedType = v),
                               ),
                             ],
                           ),
@@ -406,7 +456,8 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                         keyboardType: TextInputType.number,
                         filColor: Colors.white,
                         validator: (v) {
-                          if (v == null || v.isEmpty) return "Capacity is required for Group";
+                          if (v == null || v.isEmpty)
+                            return "Capacity is required for Group";
                           return null;
                         },
                       ),
@@ -419,7 +470,9 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
                         onTap: controller.isSaving.value ? () {} : _submit,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.030),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.030,
+                    ),
                   ],
                 ),
               ),
@@ -430,7 +483,6 @@ class _EditClassBottomSheetState extends State<EditClassBottomSheet> {
     );
   }
 }
-
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -476,16 +528,25 @@ class _DropdownField extends StatelessWidget {
           value: value,
           hint: Text(
             hint,
-            style: const TextStyle(color: Color(0xFF454F5B), fontSize: 15, fontWeight: FontWeight.w400),
+            style: const TextStyle(
+              color: Color(0xFF454F5B),
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+            ),
           ),
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey.shade600),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.grey.shade600,
+          ),
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 15,
             fontWeight: FontWeight.w500,
             fontFamily: 'WorkSans',
           ),
-          items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+          items: items
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
           onChanged: onChanged,
         ),
       ),

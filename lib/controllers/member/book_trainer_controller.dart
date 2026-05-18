@@ -110,12 +110,32 @@ class BookTrainerController extends GetxController {
   String priceText(double value) => '\$${value.toStringAsFixed(2)}';
 
   void nextStep() {
+    if (currentStep.value == 1) {
+      currentStep.value = _selectedSessionStep;
+      return;
+    }
+
+    if (currentStep.value == 2 || currentStep.value == 3) {
+      currentStep.value = 4;
+      return;
+    }
+
     if (currentStep.value < 5) {
       currentStep.value++;
     }
   }
 
   void previousStep() {
+    if (currentStep.value == 4) {
+      currentStep.value = _selectedSessionStep;
+      return;
+    }
+
+    if (currentStep.value == 2 || currentStep.value == 3) {
+      currentStep.value = 1;
+      return;
+    }
+
     if (currentStep.value > 1) {
       currentStep.value--;
       return;
@@ -154,6 +174,12 @@ class BookTrainerController extends GetxController {
     final value = trainer[key]?.toString().trim();
     if (value != null && value.isNotEmpty) return value;
     return fallback;
+  }
+
+  int get _selectedSessionStep => _stepForClassType(selectedClassType.value);
+
+  int _stepForClassType(String value) {
+    return value == 'Monthly session' ? 2 : 3;
   }
 
   @override

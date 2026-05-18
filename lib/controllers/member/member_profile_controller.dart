@@ -2,6 +2,7 @@ import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/models/user_profile_model.dart';
 import 'package:fitness/services/user_service.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class MemberProfileController extends GetxController {
   MemberProfileController({UserService? userService})
@@ -31,7 +32,7 @@ class MemberProfileController extends GetxController {
       user.value = await _userService.getCurrentUser();
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Profile failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -39,7 +40,7 @@ class MemberProfileController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Profile failed',
           'Could not load profile information.',
           snackPosition: SnackPosition.BOTTOM,

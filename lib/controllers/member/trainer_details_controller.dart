@@ -1,6 +1,7 @@
 import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/services/location_service.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class TrainerDetailsController extends GetxController {
   TrainerDetailsController({LocationService? locationService})
@@ -51,7 +52,7 @@ class TrainerDetailsController extends GetxController {
       trainer.value = response.toUiMap();
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainer profile failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -59,7 +60,7 @@ class TrainerDetailsController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Trainer profile failed',
           'Could not load trainer profile.',
           snackPosition: SnackPosition.BOTTOM,

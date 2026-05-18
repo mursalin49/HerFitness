@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 enum IdentityCardSide { front, back }
 
@@ -272,7 +273,7 @@ class _IdentityCameraScreenState extends State<IdentityCameraScreen> {
     } catch (_) {
       if (!mounted) return;
 
-      Get.snackbar(
+      showAppSnackbar(
         'Camera unavailable',
         'Please check camera permission and try again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -371,7 +372,7 @@ class _IdentityCameraScreenState extends State<IdentityCameraScreen> {
     } catch (_) {
       if (!mounted) return;
 
-      Get.snackbar(
+      showAppSnackbar(
         'Camera unavailable',
         'Please check camera permission and try again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -508,7 +509,7 @@ class IdentityCheckQualityScreen extends StatelessWidget {
   void _continueFlow() {
     final currentImagePath = capturedImagePath;
     if (currentImagePath == null) {
-      Get.snackbar(
+      showAppSnackbar(
         'Photo missing',
         'Please take a photo again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -666,7 +667,7 @@ class IdentityReviewScreen extends StatelessWidget {
     final cardNumber = idCardNumber;
 
     if (frontPath == null || backPath == null || cardNumber.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Information missing',
         'Please add your ID number and capture both sides of your ID.',
         snackPosition: SnackPosition.BOTTOM,
@@ -678,7 +679,7 @@ class IdentityReviewScreen extends StatelessWidget {
     final memberDraft = memberRegisterDraft;
 
     if (_isTrainerRegistration && trainerDraft == null) {
-      Get.snackbar(
+      showAppSnackbar(
         'Registration incomplete',
         'Trainer registration information is missing. Please sign up again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -687,7 +688,7 @@ class IdentityReviewScreen extends StatelessWidget {
     }
 
     if (_isMemberRegistration && memberDraft == null) {
-      Get.snackbar(
+      showAppSnackbar(
         'Registration incomplete',
         'Member registration information is missing. Please sign up again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -784,7 +785,7 @@ class IdentityReviewScreen extends StatelessWidget {
       if (Get.isDialogOpen == true) {
         Get.back();
       }
-      Get.snackbar(
+      showAppSnackbar(
         'Verification failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
@@ -795,7 +796,7 @@ class IdentityReviewScreen extends StatelessWidget {
       }
       debugPrint('Trainer verification unexpected error: $error');
       debugPrintStack(stackTrace: stackTrace);
-      Get.snackbar(
+      showAppSnackbar(
         'Verification failed',
         error.toString(),
         snackPosition: SnackPosition.BOTTOM,

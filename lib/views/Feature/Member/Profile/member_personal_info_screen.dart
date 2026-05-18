@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../Base/AppButton/appButton.dart';
 import '../../../Base/CustomTextfield/CustomTextfield.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class MemberPersonalInfoScreen extends StatefulWidget {
   const MemberPersonalInfoScreen({super.key});
@@ -230,7 +231,7 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  Get.snackbar(
+                  showAppSnackbar(
                     "Edit Image",
                     "Image edit clicked!",
                     snackPosition: SnackPosition.BOTTOM,

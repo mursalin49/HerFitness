@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class PasswordVerificationScreen extends StatefulWidget {
   const PasswordVerificationScreen({super.key});
@@ -35,7 +36,7 @@ class _PasswordVerificationScreenState
     final email = _email;
 
     if (email.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Email missing',
         'Please go back and enter your email address.',
         snackPosition: SnackPosition.BOTTOM,
@@ -44,7 +45,7 @@ class _PasswordVerificationScreenState
     }
 
     if (currentCode.length != 6) {
-      Get.snackbar(
+      showAppSnackbar(
         'Invalid code',
         'Please enter the 6-digit code sent to your email.',
         snackPosition: SnackPosition.BOTTOM,
@@ -74,7 +75,7 @@ class _PasswordVerificationScreenState
         if (hasSession) {
           Get.offAllNamed(_nextRoute);
         } else {
-          Get.snackbar(
+          showAppSnackbar(
             'Email verified',
             'Please sign in to continue.',
             snackPosition: SnackPosition.BOTTOM,
@@ -86,13 +87,13 @@ class _PasswordVerificationScreenState
 
       Get.offNamed(AppRoutes.verifyIdentityScreen, arguments: _identityArgs);
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Verification failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Verification failed',
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
@@ -107,7 +108,7 @@ class _PasswordVerificationScreenState
   Future<void> _resendCode() async {
     final email = _email;
     if (email.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Email missing',
         'Please go back and enter your email address.',
         snackPosition: SnackPosition.BOTTOM,
@@ -123,19 +124,19 @@ class _PasswordVerificationScreenState
         await _authService.resendVerification(email: email);
       }
 
-      Get.snackbar(
+      showAppSnackbar(
         'Code sent',
         'Please check your email for the latest verification code.',
         snackPosition: SnackPosition.BOTTOM,
       );
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Resend failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Resend failed',
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,

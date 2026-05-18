@@ -1,6 +1,7 @@
 import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/services/location_service.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class TrainerLocationController extends GetxController {
   TrainerLocationController({LocationService? locationService})
@@ -25,20 +26,20 @@ class TrainerLocationController extends GetxController {
       await _locationService.setTrainerBaseLocation(lat: lat, lng: lng);
       baseLat.value = lat;
       baseLng.value = lng;
-      Get.snackbar(
+      showAppSnackbar(
         'Base location saved',
         'Your trainer base location has been updated.',
         snackPosition: SnackPosition.BOTTOM,
       );
       return true;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Location update failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Location update failed',
         'Could not update trainer base location.',
         snackPosition: SnackPosition.BOTTOM,
@@ -59,7 +60,7 @@ class TrainerLocationController extends GetxController {
       isUpdating.value = true;
       await _locationService.updateTrainerLiveLocation(lat: lat, lng: lng);
       if (showSuccess) {
-        Get.snackbar(
+        showAppSnackbar(
           'Live location updated',
           'Members can now see your latest live location.',
           snackPosition: SnackPosition.BOTTOM,
@@ -67,13 +68,13 @@ class TrainerLocationController extends GetxController {
       }
       return true;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Live location failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Live location failed',
         'Could not update trainer live location.',
         snackPosition: SnackPosition.BOTTOM,
@@ -90,7 +91,7 @@ class TrainerLocationController extends GetxController {
       isUpdating.value = true;
       await _locationService.clearTrainerLiveLocation();
       if (showSuccess) {
-        Get.snackbar(
+        showAppSnackbar(
           'Live location cleared',
           'Your live location is no longer visible.',
           snackPosition: SnackPosition.BOTTOM,
@@ -98,13 +99,13 @@ class TrainerLocationController extends GetxController {
       }
       return true;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Live location failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Live location failed',
         'Could not clear trainer live location.',
         snackPosition: SnackPosition.BOTTOM,
@@ -139,7 +140,7 @@ class TrainerLocationController extends GetxController {
         await _locationService.clearTrainerLiveLocation();
       }
 
-      Get.snackbar(
+      showAppSnackbar(
         value ? 'You are online' : 'You are offline',
         value
             ? 'Your live location is active for nearby members.'
@@ -148,14 +149,14 @@ class TrainerLocationController extends GetxController {
       );
     } on ApiException catch (error) {
       isOnline.value = previousValue;
-      Get.snackbar(
+      showAppSnackbar(
         'Status update failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
       isOnline.value = previousValue;
-      Get.snackbar(
+      showAppSnackbar(
         'Status update failed',
         'Could not update trainer online status.',
         snackPosition: SnackPosition.BOTTOM,

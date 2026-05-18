@@ -2,6 +2,7 @@ import 'package:fitness/core/network/api_client.dart';
 import 'package:fitness/models/trainer_class_model.dart';
 import 'package:fitness/services/trainer_class_service.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class MyClassesController extends GetxController {
   MyClassesController({TrainerClassService? trainerClassService})
@@ -26,7 +27,7 @@ class MyClassesController extends GetxController {
       classes.assignAll(response.map((item) => item.toUiMap()));
     } on ApiException catch (error) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Classes failed',
           error.message,
           snackPosition: SnackPosition.BOTTOM,
@@ -34,7 +35,7 @@ class MyClassesController extends GetxController {
       }
     } catch (_) {
       if (showError) {
-        Get.snackbar(
+        showAppSnackbar(
           'Classes failed',
           'Could not load classes.',
           snackPosition: SnackPosition.BOTTOM,
@@ -54,20 +55,20 @@ class MyClassesController extends GetxController {
       } else {
         classes.add(createdClass.toUiMap());
       }
-      Get.snackbar(
+      showAppSnackbar(
         'Class created',
         'Your class has been published.',
         snackPosition: SnackPosition.BOTTOM,
       );
       return true;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Create failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Create failed',
         'Could not create class.',
         snackPosition: SnackPosition.BOTTOM,
@@ -84,7 +85,7 @@ class MyClassesController extends GetxController {
 
     final id = classes[index]['id']?.toString();
     if (id == null || id.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Update failed',
         'Class ID was not found.',
         snackPosition: SnackPosition.BOTTOM,
@@ -103,20 +104,20 @@ class MyClassesController extends GetxController {
       } else {
         classes[index] = updatedClass.toUiMap();
       }
-      Get.snackbar(
+      showAppSnackbar(
         'Class updated',
         'Your changes have been saved.',
         snackPosition: SnackPosition.BOTTOM,
       );
       return true;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Update failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Update failed',
         'Could not update class.',
         snackPosition: SnackPosition.BOTTOM,
@@ -133,7 +134,7 @@ class MyClassesController extends GetxController {
 
     final id = classes[index]['id']?.toString();
     if (id == null || id.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Delete failed',
         'Class ID was not found.',
         snackPosition: SnackPosition.BOTTOM,
@@ -145,20 +146,20 @@ class MyClassesController extends GetxController {
       isSaving.value = true;
       await _trainerClassService.deleteClass(id);
       classes.removeAt(index);
-      Get.snackbar(
+      showAppSnackbar(
         'Class deleted',
         'The class has been cancelled.',
         snackPosition: SnackPosition.BOTTOM,
       );
       return true;
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Delete failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Delete failed',
         'Could not delete class.',
         snackPosition: SnackPosition.BOTTOM,

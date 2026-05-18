@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../Base/AppButton/appButton.dart';
 import '../../../Base/CustomTextfield/CustomTextfield.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
@@ -92,7 +93,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     final lng = double.tryParse(_lngController.text.trim());
 
     if (lat == null || lng == null) {
-      Get.snackbar(
+      showAppSnackbar(
         'Invalid coordinates',
         'Please enter valid latitude and longitude values.',
         snackPosition: SnackPosition.BOTTOM,
@@ -101,7 +102,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     }
 
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      Get.snackbar(
+      showAppSnackbar(
         'Invalid coordinates',
         'Latitude must be -90 to 90 and longitude must be -180 to 180.',
         snackPosition: SnackPosition.BOTTOM,
@@ -348,7 +349,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   AppButton(
                     onTap: () {
                       if (_selectedProfileImage != null) {
-                        Get.snackbar(
+                        showAppSnackbar(
                           'Profile image selected',
                           'Image upload API is not available yet, so this cannot be saved to the server.',
                           snackPosition: SnackPosition.BOTTOM,
@@ -356,7 +357,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         return;
                       }
 
-                      Get.snackbar(
+                      showAppSnackbar(
                         'Profile update unavailable',
                         'Profile updates are not available yet.',
                         snackPosition: SnackPosition.BOTTOM,

@@ -6,6 +6,7 @@ import 'package:fitness/services/user_service.dart';
 import 'package:fitness/utils/auth_role.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class SignInController extends GetxController {
   SignInController({
@@ -30,7 +31,7 @@ class SignInController extends GetxController {
     final password = passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar(
+      showAppSnackbar(
         'Missing information',
         'Please enter your email and password.',
         snackPosition: SnackPosition.BOTTOM,
@@ -57,19 +58,19 @@ class SignInController extends GetxController {
         return;
       }
 
-      Get.snackbar(
+      showAppSnackbar(
         'Sign in failed',
         'Could not determine your account role. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
       );
     } on ApiException catch (error) {
-      Get.snackbar(
+      showAppSnackbar(
         'Sign in failed',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (_) {
-      Get.snackbar(
+      showAppSnackbar(
         'Sign in failed',
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,

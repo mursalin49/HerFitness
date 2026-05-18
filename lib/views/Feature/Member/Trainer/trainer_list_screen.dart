@@ -1,3 +1,4 @@
+import 'package:fitness/controllers/member/trainer_bookmark_controller.dart';
 import 'package:fitness/controllers/member/trainer_list_controller.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
@@ -18,6 +19,10 @@ class TrainerListScreen extends StatelessWidget {
       Get.isRegistered<TrainerListController>()
       ? Get.find<TrainerListController>()
       : Get.put(TrainerListController());
+  final TrainerBookmarkController bookmarkController =
+      Get.isRegistered<TrainerBookmarkController>()
+      ? Get.find<TrainerBookmarkController>()
+      : Get.put(TrainerBookmarkController());
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -33,19 +38,33 @@ class TrainerListScreen extends StatelessWidget {
                 SizedBox(height: 16.h),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: const CustomAppbar(title: "Trainer"),
+                  child: CustomAppbar(
+                    title: "Trainer",
+                    trailing: _buildHeaderBookmarkButton(),
+                  ),
                 ),
                 SizedBox(height: 24.h),
-                _buildTabs(),
-                SizedBox(height: 16.h),
-                Expanded(
-                  child: Obx(() {
-                    if (controller.selectedTab.value == "Search") {
-                      return _buildSearchSection();
-                    } else {
-                      return _buildNearYouSection();
-                    }
-                  }),
+                Obx(
+                  () => Expanded(
+                    child: controller.showBookmarkedOnly.value
+                        ? _buildBookmarkedSection()
+                        : Column(
+                            children: [
+                              _buildTabs(),
+                              SizedBox(height: 16.h),
+                              Expanded(
+                                child: Obx(() {
+                                  if (controller.selectedTab.value ==
+                                      "Search") {
+                                    return _buildSearchSection();
+                                  } else {
+                                    return _buildNearYouSection();
+                                  }
+                                }),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
               ],
             ),
@@ -122,6 +141,25 @@ class TrainerListScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildHeaderBookmarkButton() {
+    return Obx(() {
+      final isActive =
+          controller.showBookmarkedOnly.value ||
+          bookmarkController.bookmarkedTrainers.isNotEmpty;
+
+      return GestureDetector(
+        onTap: controller.toggleBookmarkedOnly,
+        child: SvgPicture.asset(
+          isActive
+              ? "assets/icons/befor_bookmark.svg"
+              : "assets/icons/after_bookmark.svg",
+          width: 52.w,
+          height: 52.w,
+        ),
+      );
+    });
+  }
+
   Widget _buildTabs() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w),
@@ -195,6 +233,69 @@ class TrainerListScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildBookmarkedSection() {
+    return Obx(() {
+      final trainers = bookmarkController.savedTrainers;
+
+      if (trainers.isEmpty) {
+        return ListView(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 80.h),
+          children: [
+            Center(
+              child: SvgPicture.asset(
+                "assets/icons/after_bookmark.svg",
+                width: 52.w,
+                height: 52.w,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              "No bookmarked trainers yet.",
+              textAlign: TextAlign.center,
+              style: AppTextStyles.sm14Medium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        );
+      }
+
+      return Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Bookmarked Coaches",
+                  style: AppTextStyles.base16Medium.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  "${trainers.length} saved",
+                  style: AppTextStyles.sm14Medium.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+              itemCount: trainers.length,
+              itemBuilder: (context, index) =>
+                  _buildTrainerCard(trainers[index]),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildNearYouSection() {
