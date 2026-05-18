@@ -337,8 +337,8 @@ class MemberHomeScreen extends StatelessWidget {
                   topRight: Radius.circular(24.r),
                   bottomRight: Radius.circular(24.r),
                 ),
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=600&auto=format&fit=crop",
+                child: Image.asset(
+                  "assets/images/workout.png",
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
                   errorBuilder: (_, __, ___) => Container(
