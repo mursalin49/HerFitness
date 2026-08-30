@@ -56,8 +56,8 @@ class AssessmentNumberTenScreen extends StatelessWidget {
                 center: const Alignment(1.0, -1.0),
                 radius: 2.5,
                 colors: [
-                  const Color(0xFFFFA6B4).withOpacity(0.5),
-                  const Color(0xFFFFE0B9).withOpacity(0.25),
+                  const Color(0xFFFFA6B4).withValues(alpha: 0.5),
+                  const Color(0xFFFFE0B9).withValues(alpha: 0.25),
                   Colors.white,
                 ],
                 stops: const [0.0, 0.7, 1.0],
@@ -72,7 +72,10 @@ class AssessmentNumberTenScreen extends StatelessWidget {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.045),
 
-                const AssessmentAppbar(title: "Assessment", stepText: "10 of 10"),
+                const AssessmentAppbar(
+                  title: "Assessment",
+                  stepText: "10 of 10",
+                ),
 
                 SizedBox(height: 40.h),
 
@@ -91,31 +94,41 @@ class AssessmentNumberTenScreen extends StatelessWidget {
                   child: ListView.separated(
                     padding: EdgeInsets.zero,
                     itemCount: sleepOptions.length,
-                    separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 16.h),
                     itemBuilder: (context, index) {
                       return Obx(() {
-                        bool isSelected = controller.selectedSleepIndex.value == index;
+                        bool isSelected =
+                            controller.selectedSleepIndex.value == index;
                         return GestureDetector(
                           onTap: () => controller.setSleepQuality(index),
                           child: Container(
                             padding: EdgeInsets.all(16.w),
                             decoration: BoxDecoration(
-                              color: isSelected ? AppColors.actionPrimary : AppColors.bgTertiary,
+                              color: isSelected
+                                  ? AppColors.actionPrimary
+                                  : AppColors.bgTertiary,
                               borderRadius: BorderRadius.circular(22.r),
-                              border: isSelected ? Border.all(color: Colors.white, width: 0) : null,
-                              boxShadow: isSelected ? [
-                                BoxShadow(
-                                  color: AppColors.borderFocusEffect,
-                                  blurRadius: 0,
-                                  spreadRadius: 4,
-                                ),
-                              ] : null,
+                              border: isSelected
+                                  ? Border.all(color: Colors.white, width: 0)
+                                  : null,
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.borderFocusEffect,
+                                        blurRadius: 0,
+                                        spreadRadius: 4,
+                                      ),
+                                    ]
+                                  : null,
                             ),
                             child: Row(
                               children: [
                                 Icon(
                                   sleepOptions[index]["icon"],
-                                  color: isSelected ? Colors.white : AppColors.textDisabled,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppColors.textDisabled,
                                   size: 40.sp,
                                 ),
                                 SizedBox(width: 16.w),
@@ -123,7 +136,9 @@ class AssessmentNumberTenScreen extends StatelessWidget {
                                   child: Text(
                                     sleepOptions[index]["label"],
                                     style: AppTextStyles.lg18Medium.copyWith(
-                                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColors.textPrimary,
                                     ),
                                   ),
                                 ),
@@ -132,13 +147,19 @@ class AssessmentNumberTenScreen extends StatelessWidget {
                                     Icon(
                                       Icons.access_time,
                                       size: 16.sp,
-                                      color: isSelected ? Colors.white.withOpacity(0.8) : AppColors.textDisabled,
+                                      color: isSelected
+                                          ? Colors.white.withValues(alpha: 0.8)
+                                          : AppColors.textDisabled,
                                     ),
                                     SizedBox(width: 4.w),
                                     Text(
                                       sleepOptions[index]["range"],
                                       style: AppTextStyles.sm14Medium.copyWith(
-                                        color: isSelected ? Colors.white.withOpacity(0.8) : AppColors.textSecondary,
+                                        color: isSelected
+                                            ? Colors.white.withValues(
+                                                alpha: 0.8,
+                                              )
+                                            : AppColors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -154,17 +175,26 @@ class AssessmentNumberTenScreen extends StatelessWidget {
 
                 Padding(
                   padding: EdgeInsets.only(bottom: 50.h),
-                  child: AppButton(
-                    text: "Continue",
-                    showArrow: true,
-                    onTap: () {
-                      Get.offAllNamed(AppRoutes.memberBottomNavScreen);
-                    },
+                  child: Obx(
+                    () => AppButton(
+                      text: "Continue",
+                      showArrow: !controller.isSubmitting.value,
+                      isLoading: controller.isSubmitting.value,
+                      onTap: controller.isSubmitting.value
+                          ? () {}
+                          : () async {
+                              final success = await controller
+                                  .submitAssessment();
+                              if (!success) return;
+
+                              Get.offAllNamed(AppRoutes.memberBottomNavScreen);
+                            },
+                    ),
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

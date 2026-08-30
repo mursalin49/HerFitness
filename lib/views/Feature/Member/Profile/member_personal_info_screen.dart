@@ -1,3 +1,5 @@
+import 'package:fitness/controllers/member/member_profile_controller.dart';
+import 'package:fitness/models/user_profile_model.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -7,12 +9,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../Base/AppButton/appButton.dart';
 import '../../../Base/CustomTextfield/CustomTextfield.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class MemberPersonalInfoScreen extends StatefulWidget {
   const MemberPersonalInfoScreen({super.key});
 
   @override
-  State<MemberPersonalInfoScreen> createState() => _MemberPersonalInfoScreenState();
+  State<MemberPersonalInfoScreen> createState() =>
+      _MemberPersonalInfoScreenState();
 }
 
 class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
@@ -21,10 +25,25 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  late final MemberProfileController _profileController;
+  Worker? _profileWorker;
 
+  @override
+  void initState() {
+    super.initState();
+    _profileController = Get.isRegistered<MemberProfileController>()
+        ? Get.find<MemberProfileController>()
+        : Get.put(MemberProfileController());
+    _profileWorker = ever<UserProfileModel?>(
+      _profileController.user,
+      _populateProfile,
+    );
+    _populateProfile(_profileController.user.value);
+  }
 
   @override
   void dispose() {
+    _profileWorker?.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -32,6 +51,16 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
     _locationController.dispose();
 
     super.dispose();
+  }
+
+  void _populateProfile(UserProfileModel? user) {
+    if (user == null) return;
+
+    _nameController.text = user.displayName;
+    _emailController.text = user.email ?? '';
+    _phoneController.text = user.phoneNumber ?? '';
+    _stateController.text = user.state ?? '';
+    _locationController.text = user.location ?? '';
   }
 
   @override
@@ -47,7 +76,6 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   _buildLabel("Full Name"),
                   CustomTextField(
                     prefixIcon: "assets/icons/personIcon.svg",
@@ -87,10 +115,7 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
                   ),
                   SizedBox(height: 32.h),
 
-                  AppButton(
-                    onTap: () {},
-                    text: "Save Settings",
-                  ),
+                  AppButton(onTap: () {}, text: "Save Settings"),
                   SizedBox(height: 40.h),
                 ],
               ),
@@ -111,7 +136,12 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
           Container(
             height: 160.h,
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(20.w, MediaQuery.of(context).padding.top + 10.h, 20.w, 0),
+            padding: EdgeInsets.fromLTRB(
+              20.w,
+              MediaQuery.of(context).padding.top + 10.h,
+              20.w,
+              0,
+            ),
             decoration: BoxDecoration(
               color: AppColors.actionPrimary,
               borderRadius: BorderRadius.only(
@@ -132,7 +162,11 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
                       color: Colors.white,
                     ),
                     child: const Center(
-                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Colors.black),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
@@ -142,7 +176,10 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
                     child: Center(
                       child: AppText(
                         "Personal Info",
-                        style: AppTextStyles.base16SemiBold.copyWith(color: Colors.white, fontSize: 20.sp),
+                        style: AppTextStyles.base16SemiBold.copyWith(
+                          color: Colors.white,
+                          fontSize: 20.sp,
+                        ),
                       ),
                     ),
                   ),
@@ -157,18 +194,32 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
             left: 0,
             right: 0,
             child: Center(
-              child: Container(
-                width: 87.w,
-                height: 80.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.r),
-                  image: const DecorationImage(
-                    image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                    fit: BoxFit.cover,
+              child: Obx(() {
+                final imageUrl = _profileController.profileImageUrl;
+
+                return Container(
+                  width: 87.w,
+                  height: 80.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24.r),
+                    color: AppColors.bgSecondary,
+                    image: imageUrl.isEmpty
+                        ? null
+                        : DecorationImage(
+                            image: NetworkImage(imageUrl),
+                            fit: BoxFit.cover,
+                          ),
+                    border: Border.all(color: Colors.white, width: 2.w),
                   ),
-                  border: Border.all(color: Colors.white, width: 2.w),
-                ),
-              ),
+                  child: imageUrl.isEmpty
+                      ? Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 38.w,
+                        )
+                      : null,
+                );
+              }),
             ),
           ),
           // 3. Edit Icon
@@ -180,7 +231,7 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  Get.snackbar(
+                  showAppSnackbar(
                     "Edit Image",
                     "Image edit clicked!",
                     snackPosition: SnackPosition.BOTTOM,
@@ -229,9 +280,11 @@ class _MemberPersonalInfoScreenState extends State<MemberPersonalInfoScreen> {
       padding: EdgeInsets.only(bottom: 8.h),
       child: AppText(
         text,
-        style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+        style: AppTextStyles.sm14Medium.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
-
 }

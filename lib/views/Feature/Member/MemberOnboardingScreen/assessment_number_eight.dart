@@ -16,11 +16,8 @@ class AssessmentNumberEightScreen extends StatelessWidget {
   final List<String> supplementOptions = [
     "Whey",
     "Protein",
-    "BCAAs",
     "Vitamin D",
     "Magnesium",
-    "Omega-3",
-    "Creatine",
   ];
 
   @override
@@ -38,8 +35,8 @@ class AssessmentNumberEightScreen extends StatelessWidget {
                 center: const Alignment(1.0, -1.0),
                 radius: 2.5,
                 colors: [
-                  const Color(0xFFFFA6B4).withOpacity(0.5),
-                  const Color(0xFFFFE0B9).withOpacity(0.25),
+                  const Color(0xFFFFA6B4).withValues(alpha: 0.5),
+                  const Color(0xFFFFE0B9).withValues(alpha: 0.25),
                   Colors.white,
                 ],
                 stops: const [0.0, 0.7, 1.0],
@@ -53,8 +50,13 @@ class AssessmentNumberEightScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.045),
-                    const AssessmentAppbar(title: "Assessment", stepText: "8 of 10"),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.045,
+                    ),
+                    const AssessmentAppbar(
+                      title: "Assessment",
+                      stepText: "8 of 10",
+                    ),
                   ],
                 ),
               ),
@@ -73,7 +75,7 @@ class AssessmentNumberEightScreen extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 20,
                         offset: const Offset(0, -5),
                       ),
@@ -135,39 +137,62 @@ class AssessmentNumberEightScreen extends StatelessWidget {
                         child: ListView.separated(
                           padding: EdgeInsets.symmetric(horizontal: 24.w),
                           itemCount: supplementOptions.length,
-                          separatorBuilder: (context, index) => SizedBox(height: 12.h),
+                          separatorBuilder: (context, index) =>
+                              SizedBox(height: 12.h),
                           itemBuilder: (context, index) {
                             String item = supplementOptions[index];
                             return Obx(() {
-                              bool isSelected = controller.selectedSupplements.contains(item);
+                              bool isSelected = controller.selectedSupplements
+                                  .contains(item);
                               return GestureDetector(
                                 onTap: () => controller.toggleSupplement(item),
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                    vertical: 16.h,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? AppColors.actionPrimary: AppColors.bgTertiary,
+                                    color: isSelected
+                                        ? AppColors.actionPrimary
+                                        : AppColors.bgTertiary,
                                     borderRadius: BorderRadius.circular(16.r),
-                                    border: isSelected ? Border.all(color: Colors.white, width: 0) : null,
-                                    boxShadow: isSelected ? [
-                                      BoxShadow(
-                                        color: AppColors.borderFocusEffect,
-                                        blurRadius: 0,
-                                        spreadRadius: 4,
-                                      ),
-                                    ] : null,
+                                    border: isSelected
+                                        ? Border.all(
+                                            color: Colors.white,
+                                            width: 0,
+                                          )
+                                        : null,
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color:
+                                                  AppColors.borderFocusEffect,
+                                              blurRadius: 0,
+                                              spreadRadius: 4,
+                                            ),
+                                          ]
+                                        : null,
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         item,
-                                        style: AppTextStyles.base16Medium.copyWith(
-                                          color: isSelected ? Colors.white : AppColors.textPrimary,
-                                        ),
+                                        style: AppTextStyles.base16Medium
+                                            .copyWith(
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : AppColors.textPrimary,
+                                            ),
                                       ),
                                       Icon(
-                                        isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                                        isSelected
+                                            ? Icons.check_circle
+                                            : Icons.radio_button_unchecked,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : AppColors.textPrimary,
                                         size: 24.sp,
                                       ),
                                     ],
@@ -181,7 +206,10 @@ class AssessmentNumberEightScreen extends StatelessWidget {
 
                       // Selected Chips
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24.w,
+                          vertical: 16.h,
+                        ),
                         child: Row(
                           children: [
                             Text(
@@ -192,10 +220,14 @@ class AssessmentNumberEightScreen extends StatelessWidget {
                             ),
                             SizedBox(width: 12.w),
                             Expanded(
-                              child: Obx(() => Wrap(
-                                spacing: 8.w,
-                                children: controller.selectedSupplements.map((item) => _buildChip(item)).toList(),
-                              )),
+                              child: Obx(
+                                () => Wrap(
+                                  spacing: 8.w,
+                                  children: controller.selectedSupplements
+                                      .map((item) => _buildChip(item))
+                                      .toList(),
+                                ),
+                              ),
                             ),
                           ],
                         ),

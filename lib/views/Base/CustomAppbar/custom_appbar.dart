@@ -8,12 +8,9 @@ import '../../../utils/AppColor/app_colors.dart';
 class CustomAppbar extends StatelessWidget {
   final String? title;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
-  const CustomAppbar({
-    super.key,
-    this.title,
-    this.onTap,
-  });
+  const CustomAppbar({super.key, this.title, this.onTap, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +31,20 @@ class CustomAppbar extends StatelessWidget {
                   offset: const Offset(0, 3),
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05), // Soft global depth
+                  color: Colors.black.withValues(
+                    alpha: 0.05,
+                  ), // Soft global depth
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: const Center(
-              child: Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black),
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                size: 20,
+                color: Colors.black,
+              ),
             ),
           ),
         ),
@@ -56,7 +59,10 @@ class CustomAppbar extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: 48.w), // Ensures the title stays absolutely centered!
+          trailing ?? SizedBox(width: 48.w),
+        ] else if (trailing != null) ...[
+          const Spacer(),
+          trailing!,
         ],
       ],
     );

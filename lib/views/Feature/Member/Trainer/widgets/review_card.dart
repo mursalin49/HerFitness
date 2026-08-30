@@ -44,7 +44,9 @@ class ReviewCard extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: AppTextStyles.base16Bold.copyWith(color: AppColors.textPrimary),
+                      style: AppTextStyles.base16Bold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     SizedBox(height: 2.h),
                     Row(
@@ -53,18 +55,25 @@ class ReviewCard extends StatelessWidget {
                         SizedBox(width: 4.w),
                         Text(
                           rating,
-                          style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                          style: AppTextStyles.sm14Medium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         SizedBox(width: 8.w),
                         Container(
                           width: 4.w,
                           height: 4.w,
-                          decoration: const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
+                          decoration: const BoxDecoration(
+                            color: Colors.grey,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                         SizedBox(width: 8.w),
                         Text(
                           timeAgo,
-                          style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary),
+                          style: AppTextStyles.sm14Medium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -73,10 +82,12 @@ class ReviewCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Text(
             reviewText,
-            style: AppTextStyles.sm14Regular.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.sm14Regular.copyWith(
+              color: AppColors.textSecondary,
+            ),
             maxLines: 5,
             overflow: TextOverflow.ellipsis,
           ),

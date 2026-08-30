@@ -1,52 +1,103 @@
+import 'package:fitness/controllers/member/book_trainer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../../../../../utils/AppColor/app_colors.dart';
 import '../../../../../utils/AppTextStyle/app_text_styles.dart';
 
 class BookingTrainerSummary extends StatelessWidget {
-  const BookingTrainerSummary({super.key});
+  final BookTrainerController controller;
+  final bool showChevron;
+  final EdgeInsetsGeometry? margin;
+
+  const BookingTrainerSummary({
+    super.key,
+    required this.controller,
+    this.showChevron = true,
+    this.margin,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12.r),
+      margin: margin,
+      padding: EdgeInsets.all(10.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9F9F9),
-        borderRadius: BorderRadius.circular(24.r),
+        color: const Color(0xFFF4F4F4),
+        borderRadius: BorderRadius.circular(20.r),
       ),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(12.r),
             child: Image.network(
-              "https://as1.ftcdn.net/jpg/02/26/49/16/1000_F_226491635_4Qp2RzkMlglsfSLIzXjLeRmqdTnaD4p8.jpg",
-              width: 80.w,
-              height: 80.w,
+              controller.trainerImageUrl,
+              width: 64.w,
+              height: 64.w,
               fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 64.w,
+                height: 64.w,
+                color: AppColors.bgTertiary,
+                child: Icon(Icons.person, size: 26.sp),
+              ),
             ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Seraphina Dubois", style: AppTextStyles.base16Bold.copyWith(color: AppColors.textPrimary)),
+                Text(
+                  controller.trainerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.sm14SemiBold.copyWith(
+                    color: AppColors.textPrimary,
+                    letterSpacing: 0,
+                  ),
+                ),
                 SizedBox(height: 8.h),
                 Row(
                   children: [
-                    Icon(Icons.star, color: Colors.orange, size: 16.sp),
-                    SizedBox(width: 4.w),
-                    Text("4.5", style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary)),
-                    SizedBox(width: 12.w),
-                    Icon(Icons.people, color: AppColors.actionPrimary, size: 16.sp),
-                    SizedBox(width: 4.w),
-                    Text("21 Clients", style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textSecondary)),
+                    Icon(
+                      Icons.star,
+                      color: const Color(0xFFF59E0B),
+                      size: 14.sp,
+                    ),
+                    SizedBox(width: 3.w),
+                    Text(
+                      controller.trainerRating.toStringAsFixed(1),
+                      style: AppTextStyles.xs12Medium.copyWith(
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Icon(
+                      Icons.groups_rounded,
+                      color: AppColors.actionPrimary,
+                      size: 14.sp,
+                    ),
+                    SizedBox(width: 3.w),
+                    Text(
+                      '${controller.reviewCount} Clients',
+                      style: AppTextStyles.xs12Regular.copyWith(
+                        color: AppColors.textSecondary,
+                        letterSpacing: 0,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, color: AppColors.textTertiary, size: 16.sp),
+          if (showChevron)
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.iconPrimary,
+              size: 24.sp,
+            ),
         ],
       ),
     );

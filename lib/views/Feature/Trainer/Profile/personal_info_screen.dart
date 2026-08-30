@@ -1,3 +1,8 @@
+import 'dart:io';
+
+import 'package:fitness/controllers/trainer/trainer_profile_controller.dart';
+import 'package:fitness/controllers/trainer/trainer_location_controller.dart';
+import 'package:fitness/models/user_profile_model.dart';
 import 'package:fitness/utils/AppColor/app_colors.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
@@ -5,8 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../Base/AppButton/appButton.dart';
 import '../../../Base/CustomTextfield/CustomTextfield.dart';
+import 'package:fitness/utils/app_snackbar.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
@@ -25,13 +32,36 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final TextEditingController _certController = TextEditingController();
   final TextEditingController _hostModeController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _latController = TextEditingController();
+  final TextEditingController _lngController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
   List<String> _teachClasses = ["Yoga", "Strength Training"];
   String? _selectedHostMode;
   final List<String> _hostModeOptions = ["Online", "In person", "Both"];
+  late final TrainerProfileController _profileController;
+  late final TrainerLocationController _trainerLocationController;
+  Worker? _profileWorker;
+  File? _selectedProfileImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileController = Get.isRegistered<TrainerProfileController>()
+        ? Get.find<TrainerProfileController>()
+        : Get.put(TrainerProfileController());
+    _trainerLocationController = Get.isRegistered<TrainerLocationController>()
+        ? Get.find<TrainerLocationController>()
+        : Get.put(TrainerLocationController());
+    _profileWorker = ever<UserProfileModel?>(
+      _profileController.user,
+      _populateProfile,
+    );
+    _populateProfile(_profileController.user.value);
+  }
 
   @override
   void dispose() {
+    _profileWorker?.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -41,8 +71,92 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     _certController.dispose();
     _hostModeController.dispose();
     _locationController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
     _tagController.dispose();
     super.dispose();
+  }
+
+  void _populateProfile(UserProfileModel? user) {
+    if (user == null) return;
+
+    _nameController.text = user.displayName;
+    _emailController.text = user.email ?? '';
+    _phoneController.text = user.phoneNumber ?? '';
+    _stateController.text = user.state ?? '';
+    _locationController.text = user.location ?? '';
+    _bioController.text = user.bio ?? '';
+  }
+
+  Future<void> _saveBaseLocation() async {
+    final lat = double.tryParse(_latController.text.trim());
+    final lng = double.tryParse(_lngController.text.trim());
+
+    if (lat == null || lng == null) {
+      showAppSnackbar(
+        'Invalid coordinates',
+        'Please enter valid latitude and longitude values.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      showAppSnackbar(
+        'Invalid coordinates',
+        'Latitude must be -90 to 90 and longitude must be -180 to 180.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    await _trainerLocationController.setBaseLocation(lat: lat, lng: lng);
+  }
+
+  Future<void> _pickProfileImage() async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.bgPrimary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: Icon(
+                Icons.photo_library_outlined,
+                color: AppColors.actionPrimary,
+              ),
+              title: AppText('Gallery', style: AppTextStyles.base16Medium),
+              onTap: () => _selectProfileImage(ImageSource.gallery),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.camera_alt_outlined,
+                color: AppColors.actionPrimary,
+              ),
+              title: AppText('Camera', style: AppTextStyles.base16Medium),
+              onTap: () => _selectProfileImage(ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectProfileImage(ImageSource source) async {
+    Get.back();
+
+    final pickedImage = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 85,
+    );
+    if (pickedImage == null) return;
+
+    setState(() {
+      _selectedProfileImage = File(pickedImage.path);
+    });
   }
 
   @override
@@ -58,7 +172,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   _buildLabel("Full Name"),
                   CustomTextField(
                     prefixIcon: "assets/icons/personIcon.svg",
@@ -66,7 +179,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     controller: _nameController,
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("Email Address"),
                   CustomTextField(
                     hintText: "Enter your E-mail",
@@ -74,7 +187,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     prefixIcon: "assets/icons/emailIcon.svg",
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("Phone number"),
                   CustomTextField(
                     prefixIcon: Icon(Icons.phone_outlined, size: 20.w),
@@ -82,14 +195,14 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     controller: _phoneController,
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("Your state"),
                   CustomTextField(
                     hintText: "Enter your state",
                     controller: _stateController,
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("Personal Bio"),
                   CustomTextField(
                     maxLines: 4,
@@ -97,11 +210,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     controller: _bioController,
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("What fitness classes do you teach?"),
                   _buildTeachClassesField(),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("How long have you been an instructor?"),
                   CustomTextField(
                     prefixIcon: Icon(Icons.calendar_month_outlined, size: 20.w),
@@ -109,26 +222,34 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     controller: _durationController,
                   ),
                   SizedBox(height: 16.h),
-                  _buildLabel("What certifications/qualifications do you have?"),
+                  _buildLabel(
+                    "What certifications/qualifications do you have?",
+                  ),
                   CustomTextField(
                     maxLines: 4,
                     hintText: "e.g. NASM CPT",
                     controller: _certController,
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("Do you host classes online or in person?"),
                   Theme(
                     data: Theme.of(context).copyWith(
-                      buttonTheme: ButtonTheme.of(context).copyWith(
-                        alignedDropdown: true,
-                      ),
+                      buttonTheme: ButtonTheme.of(
+                        context,
+                      ).copyWith(alignedDropdown: true),
                     ),
                     child: DropdownButtonFormField<String>(
                       value: _selectedHostMode,
                       isExpanded: true,
-                      icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20.w, color: AppColors.textSecondary),
-                      style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 20.w,
+                        color: AppColors.textSecondary,
+                      ),
+                      style: AppTextStyles.sm14Medium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                       dropdownColor: Colors.white,
                       borderRadius: BorderRadius.circular(12.r),
                       decoration: InputDecoration(
@@ -138,7 +259,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           fontWeight: FontWeight.w400,
                         ),
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 14.h,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
                           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -149,13 +273,20 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(color: AppColors.actionPrimary),
+                          borderSide: BorderSide(
+                            color: AppColors.actionPrimary,
+                          ),
                         ),
                       ),
                       items: _hostModeOptions.map((String mode) {
                         return DropdownMenuItem<String>(
                           value: mode,
-                          child: AppText(mode, style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary)),
+                          child: AppText(
+                            mode,
+                            style: AppTextStyles.sm14Medium.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
                         );
                       }).toList(),
                       onChanged: (String? newValue) {
@@ -166,17 +297,72 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildLabel("Location"),
                   CustomTextField(
                     prefixIcon: Icon(Icons.location_on_outlined, size: 20.w),
                     hintText: "Syracuse, Connecticut",
                     controller: _locationController,
                   ),
+                  SizedBox(height: 16.h),
+
+                  _buildLabel("Base Coordinates"),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          prefixIcon: Icon(Icons.pin_drop_outlined, size: 20.w),
+                          hintText: "Latitude",
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: true,
+                          ),
+                          controller: _latController,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: CustomTextField(
+                          prefixIcon: Icon(Icons.pin_drop, size: 20.w),
+                          hintText: "Longitude",
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: true,
+                          ),
+                          controller: _lngController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Obx(
+                    () => AppButton(
+                      onTap: _trainerLocationController.isUpdating.value
+                          ? () {}
+                          : _saveBaseLocation,
+                      text: "Save Base Location",
+                      isLoading: _trainerLocationController.isUpdating.value,
+                    ),
+                  ),
                   SizedBox(height: 32.h),
-                  
+
                   AppButton(
-                    onTap: () {},
+                    onTap: () {
+                      if (_selectedProfileImage != null) {
+                        showAppSnackbar(
+                          'Profile image selected',
+                          'Image upload API is not available yet, so this cannot be saved to the server.',
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                        return;
+                      }
+
+                      showAppSnackbar(
+                        'Profile update unavailable',
+                        'Profile updates are not available yet.',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    },
                     text: "Save Settings",
                   ),
                   SizedBox(height: 40.h),
@@ -199,7 +385,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           Container(
             height: 160.h,
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(20.w, MediaQuery.of(context).padding.top + 10.h, 20.w, 0),
+            padding: EdgeInsets.fromLTRB(
+              20.w,
+              MediaQuery.of(context).padding.top + 10.h,
+              20.w,
+              0,
+            ),
             decoration: BoxDecoration(
               color: AppColors.actionPrimary,
               borderRadius: BorderRadius.only(
@@ -220,7 +411,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       color: Colors.white,
                     ),
                     child: const Center(
-                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Colors.black),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
@@ -230,7 +425,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     child: Center(
                       child: AppText(
                         "Personal Info",
-                        style: AppTextStyles.base16SemiBold.copyWith(color: Colors.white, fontSize: 20.sp),
+                        style: AppTextStyles.base16SemiBold.copyWith(
+                          color: Colors.white,
+                          fontSize: 20.sp,
+                        ),
                       ),
                     ),
                   ),
@@ -245,18 +443,38 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             left: 0,
             right: 0,
             child: Center(
-              child: Container(
-                width: 87.w,
-                height: 80.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.r),
-                  image: const DecorationImage(
-                    image: NetworkImage("https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"),
-                    fit: BoxFit.cover,
+              child: Obx(() {
+                final imageUrl = _profileController.profileImageUrl;
+                final ImageProvider? imageProvider =
+                    _selectedProfileImage != null
+                    ? FileImage(_selectedProfileImage!)
+                    : imageUrl.isNotEmpty
+                    ? NetworkImage(imageUrl)
+                    : null;
+
+                return Container(
+                  width: 87.w,
+                  height: 80.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24.r),
+                    color: AppColors.bgSecondary,
+                    image: imageProvider == null
+                        ? null
+                        : DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                          ),
+                    border: Border.all(color: Colors.white, width: 2.w),
                   ),
-                  border: Border.all(color: Colors.white, width: 2.w),
-                ),
-              ),
+                  child: imageProvider == null
+                      ? Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 38.w,
+                        )
+                      : null,
+                );
+              }),
             ),
           ),
           // 3. Edit Icon
@@ -267,16 +485,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             child: Center(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  Get.snackbar(
-                    "Edit Image",
-                    "Image edit clicked!",
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.black87,
-                    colorText: Colors.white,
-                    margin: EdgeInsets.all(16),
-                  );
-                },
+                onTap: _pickProfileImage,
                 child: Container(
                   padding: EdgeInsets.all(3.w),
                   decoration: BoxDecoration(
@@ -317,7 +526,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       padding: EdgeInsets.only(bottom: 8.h),
       child: AppText(
         text,
-        style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+        style: AppTextStyles.sm14Medium.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -343,7 +555,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 width: 100.w,
                 child: TextField(
                   controller: _tagController,
-                  style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+                  style: AppTextStyles.sm14Medium.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                   decoration: const InputDecoration(
                     hintText: "Add...",
                     border: InputBorder.none,
@@ -404,7 +618,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         children: [
           AppText(
             text,
-            style: AppTextStyles.xs12Regular.copyWith(color: AppColors.actionPrimary, fontWeight: FontWeight.w600),
+            style: AppTextStyles.xs12Regular.copyWith(
+              color: AppColors.actionPrimary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           SizedBox(width: 4.w),
           GestureDetector(
@@ -413,7 +630,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 _teachClasses.remove(text);
               });
             },
-            child: Icon(Icons.close, size: 14.w, color: AppColors.actionPrimary),
+            child: Icon(
+              Icons.close,
+              size: 14.w,
+              color: AppColors.actionPrimary,
+            ),
           ),
         ],
       ),
@@ -429,7 +650,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       ),
       child: AppText(
         text,
-        style: AppTextStyles.xs12Regular.copyWith(color: AppColors.actionPrimary),
+        style: AppTextStyles.xs12Regular.copyWith(
+          color: AppColors.actionPrimary,
+        ),
       ),
     );
   }

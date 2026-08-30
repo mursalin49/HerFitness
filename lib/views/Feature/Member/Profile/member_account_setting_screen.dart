@@ -1,4 +1,5 @@
 import 'package:fitness/utils/AppColor/app_colors.dart';
+import 'package:fitness/services/auth_service.dart';
 import 'package:fitness/utils/AppTextStyle/app_text_styles.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../Helpers/route.dart';
-import 'member_personal_info_screen.dart';
 
 class MemberAccountSettingsScreen extends StatelessWidget {
   const MemberAccountSettingsScreen({super.key});
@@ -31,16 +31,22 @@ class MemberAccountSettingsScreen extends StatelessWidget {
                 _buildSettingItem(
                   icon: Icons.notifications_none_rounded,
                   title: "Notifications settings",
-                  onTap: () => Get.toNamed(AppRoutes.notificationSettingsScreen),
+                  onTap: () =>
+                      Get.toNamed(AppRoutes.notificationSettingsScreen),
                 ),
-                _buildSettingItem(icon: Icons.credit_card_rounded, title: "Transactions", onTap: () {}),
+                _buildSettingItem(
+                  icon: Icons.credit_card_rounded,
+                  title: "Transactions",
+                  onTap: () {},
+                ),
 
                 SizedBox(height: 24.h),
                 _buildSectionTitle("Security & Privacy"),
                 _buildSettingItem(
                   icon: Icons.lock_outline_rounded,
                   title: "Change Password",
-                  onTap: () => Get.toNamed(AppRoutes.profileChangePasswordScreen),
+                  onTap: () =>
+                      Get.toNamed(AppRoutes.profileChangePasswordScreen),
                 ),
                 _buildSettingItem(
                   icon: Icons.description_outlined,
@@ -93,7 +99,9 @@ class MemberAccountSettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => Dialog(
         insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
         child: Padding(
           padding: EdgeInsets.all(10.w),
           child: Column(
@@ -105,7 +113,13 @@ class MemberAccountSettingsScreen extends StatelessWidget {
                   color: const Color(0xFFFEF2F2),
                   shape: BoxShape.circle,
                 ),
-                child: SvgPicture.asset("assets/icons/deleteIcon.svg", color: Colors.redAccent),
+                child: SvgPicture.asset(
+                  "assets/icons/deleteIcon.svg",
+                  colorFilter: const ColorFilter.mode(
+                    Colors.redAccent,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
               SizedBox(height: 16.h),
               AppText(
@@ -116,7 +130,9 @@ class MemberAccountSettingsScreen extends StatelessWidget {
               AppText(
                 "Are you sure to delete this account?",
                 textAlign: TextAlign.center,
-                style: AppTextStyles.sm14Regular.copyWith(color: const Color(0xFF454F5B)),
+                style: AppTextStyles.sm14Regular.copyWith(
+                  color: const Color(0xFF454F5B),
+                ),
               ),
               SizedBox(height: 16.h),
               Row(
@@ -126,10 +142,17 @@ class MemberAccountSettingsScreen extends StatelessWidget {
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey.shade300),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                       ),
-                      child: AppText("Cancel", style: AppTextStyles.sm14Medium.copyWith(color: Colors.black)),
+                      child: AppText(
+                        "Cancel",
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -141,11 +164,18 @@ class MemberAccountSettingsScreen extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEF4444),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         elevation: 0,
                       ),
-                      child: AppText("Delete", style: AppTextStyles.sm14Medium.copyWith(color: Colors.white)),
+                      child: AppText(
+                        "Delete",
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -163,7 +193,9 @@ class MemberAccountSettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => Dialog(
         insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
         child: Padding(
           padding: EdgeInsets.all(10.w),
           child: Column(
@@ -175,7 +207,11 @@ class MemberAccountSettingsScreen extends StatelessWidget {
                   color: AppColors.actionPrimary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.logout_rounded, color: AppColors.actionPrimary, size: 32.w),
+                child: Icon(
+                  Icons.logout_rounded,
+                  color: AppColors.actionPrimary,
+                  size: 32.w,
+                ),
               ),
               SizedBox(height: 16.h),
               AppText(
@@ -186,7 +222,9 @@ class MemberAccountSettingsScreen extends StatelessWidget {
               AppText(
                 "Are you sure you want to log out of this account?",
                 textAlign: TextAlign.center,
-                style: AppTextStyles.sm14Regular.copyWith(color: const Color(0xFF454F5B)),
+                style: AppTextStyles.sm14Regular.copyWith(
+                  color: const Color(0xFF454F5B),
+                ),
               ),
               SizedBox(height: 16.h),
               Row(
@@ -196,25 +234,59 @@ class MemberAccountSettingsScreen extends StatelessWidget {
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey.shade300),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                       ),
-                      child: AppText("Cancel", style: AppTextStyles.sm14Medium.copyWith(color: Colors.black)),
+                      child: AppText(
+                        "Cancel",
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        Get.dialog(
+                          Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.actionPrimary,
+                            ),
+                          ),
+                          barrierDismissible: false,
+                        );
+
+                        try {
+                          await AuthService().logout();
+                        } catch (_) {
+                          // AuthService clears local tokens even if server logout fails.
+                        } finally {
+                          if (Get.isDialogOpen == true) {
+                            Get.back();
+                          }
+                        }
+
                         Get.offAllNamed(AppRoutes.signInScreen);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.actionPrimary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         elevation: 0,
                       ),
-                      child: AppText("Log Out", style: AppTextStyles.sm14Medium.copyWith(color: Colors.white)),
+                      child: AppText(
+                        "Log Out",
+                        style: AppTextStyles.sm14Medium.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -254,7 +326,11 @@ class MemberAccountSettingsScreen extends StatelessWidget {
                 color: Colors.white,
               ),
               child: const Center(
-                child: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Colors.black),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 20,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
@@ -262,11 +338,14 @@ class MemberAccountSettingsScreen extends StatelessWidget {
             child: Center(
               child: AppText(
                 "Account Settings",
-                style: AppTextStyles.base16SemiBold.copyWith(color: Colors.white, fontSize: 20.sp),
+                style: AppTextStyles.base16SemiBold.copyWith(
+                  color: Colors.white,
+                  fontSize: 20.sp,
+                ),
               ),
             ),
           ),
-          SizedBox(width: 44.w)
+          SizedBox(width: 44.w),
         ],
       ),
     );
@@ -277,12 +356,19 @@ class MemberAccountSettingsScreen extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 12.h, left: 4.w),
       child: AppText(
         title,
-        style: AppTextStyles.base16SemiBold.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+        style: AppTextStyles.base16SemiBold.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
 
-  Widget _buildSettingItem({required IconData icon, required String title, required VoidCallback onTap}) {
+  Widget _buildSettingItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
@@ -304,9 +390,15 @@ class MemberAccountSettingsScreen extends StatelessWidget {
         ),
         title: AppText(
           title,
-          style: AppTextStyles.sm14Medium.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.sm14Medium.copyWith(
+            color: AppColors.textPrimary,
+          ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textPrimary),
+        trailing: Icon(
+          Icons.arrow_forward_ios_rounded,
+          size: 16,
+          color: AppColors.textPrimary,
+        ),
       ),
     );
   }
@@ -327,13 +419,24 @@ class MemberAccountSettingsScreen extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(10.r),
           ),
-          child: const Icon(Icons.lock_outline_rounded, color: Colors.white, size: 22),
+          child: const Icon(
+            Icons.lock_outline_rounded,
+            color: Colors.white,
+            size: 22,
+          ),
         ),
         title: AppText(
           "Delete Account",
-          style: AppTextStyles.sm14Medium.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+          style: AppTextStyles.sm14Medium.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
+        trailing: const Icon(
+          Icons.arrow_forward_ios_rounded,
+          size: 16,
+          color: Colors.white,
+        ),
       ),
     );
   }

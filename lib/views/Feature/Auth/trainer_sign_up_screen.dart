@@ -1,13 +1,10 @@
-import 'dart:ui';
 import '../../Base/ProfilePicPicker/profile_pic_picker.dart';
 import 'package:fitness/Helpers/route.dart';
-import 'package:fitness/utils/AppIcons/app_icons.dart';
+import 'package:fitness/controllers/auth/trainer_register_controller.dart';
 import 'package:fitness/views/Base/AppButton/appButton.dart';
 import 'package:fitness/views/Base/AppText/appText.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../../../utils/AppColor/app_colors.dart';
 import '../../../utils/AppTextStyle/app_text_styles.dart';
@@ -21,20 +18,15 @@ class TrainerSignUpScreen extends StatefulWidget {
 }
 
 class _TrainerSignUpScreenState extends State<TrainerSignUpScreen> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController stateController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController bioController = TextEditingController();
-  final TextEditingController classesController = TextEditingController();
-  final TextEditingController durationController = TextEditingController();
-  final TextEditingController certController = TextEditingController();
-  final TextEditingController hostingController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  late final TrainerRegisterController registerController;
 
-
+  @override
+  void initState() {
+    super.initState();
+    registerController = Get.isRegistered<TrainerRegisterController>()
+        ? Get.find<TrainerRegisterController>()
+        : Get.put(TrainerRegisterController());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +42,14 @@ class _TrainerSignUpScreenState extends State<TrainerSignUpScreen> {
                 center: Alignment(1.0, -1.0),
                 radius: 2.5,
                 colors: [
-                  const Color(0xFFFFA6B4).withOpacity(0.5),
-                  const Color(0xFFFFE0B9).withOpacity(0.25),
+                  const Color(0xFFFFA6B4).withValues(alpha: 0.5),
+                  const Color(0xFFFFE0B9).withValues(alpha: 0.25),
                   Colors.white,
                 ],
                 stops: const [0.0, 0.7, 1.0],
               ),
             ),
           ),
-
 
           SafeArea(
             child: SingleChildScrollView(
@@ -68,17 +59,14 @@ class _TrainerSignUpScreenState extends State<TrainerSignUpScreen> {
                 children: [
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
-                  Image.asset(
-                    "assets/images/sigupImg.png",
-                  ),
+                  Image.asset("assets/images/sigupImg.png"),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
                   // Profile picture picker
                   ProfilePicPicker(
-                    placeholderImage: "assets/images/trainerImg.png", // Placeholder
-                    onImagePicked: (file) {
-                      // Handle picked file safely
-                    },
+                    placeholderImage:
+                        "assets/images/trainerImg.png", // Placeholder
+                    onImagePicked: registerController.setProfileImage,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.04),
 
@@ -101,80 +89,97 @@ class _TrainerSignUpScreenState extends State<TrainerSignUpScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(height: 18.h,),
+                          SizedBox(height: 18.h),
 
                           _buildLabel("Enter your name"),
                           CustomTextField(
                             hintText: 'Enter your name',
-                            controller: nameController,
+                            controller: registerController.nameController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/personIcon.svg",
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("Enter your email"),
                           CustomTextField(
                             hintText: 'Enter your E-mail',
-                            controller: emailController,
+                            controller: registerController.emailController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/emailIcon.svg",
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("Phone number"),
                           CustomTextField(
                             hintText: '(229) 555-0109',
-                            controller: phoneController,
+                            controller: registerController.phoneController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/phoneIcon.svg",
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("Your state"),
                           CustomTextField(
                             hintText: 'Select your state',
-                            controller: stateController,
+                            controller: registerController.stateController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("Your location"),
                           CustomTextField(
                             hintText: 'Syracuse, Connecticut',
-                            controller: locationController,
+                            controller: registerController.locationController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/locationIcon.svg",
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("Personal Bio"),
-                          _buildAreaFieldWithCounter('e.g. NASM CPT', bioController),
-                          SizedBox(height: 16.h,),
+                          _buildAreaFieldWithCounter(
+                            'e.g. NASM CPT',
+                            registerController.bioController,
+                          ),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("What fitness classes do you teach?"),
                           Stack(
                             children: [
                               CustomTextField(
                                 hintText: 'Strength Training|',
-                                controller: classesController,
+                                controller:
+                                    registerController.classesTaughtController,
                                 filColor: AppColors.bgPrimary,
                                 borderColor: AppColors.actionPrimary,
                                 prefixIcon: Padding(
-                                  padding: EdgeInsets.only(left: 12.w, top: 10.h, bottom: 10.h, right: 8.w),
+                                  padding: EdgeInsets.only(
+                                    left: 12.w,
+                                    top: 10.h,
+                                    bottom: 10.h,
+                                    right: 8.w,
+                                  ),
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10.w,
+                                      vertical: 4.h,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFDE8E8), // Very light pink
+                                      color: const Color(
+                                        0xFFFDE8E8,
+                                      ), // Very light pink
                                       borderRadius: BorderRadius.circular(16.r),
                                     ),
                                     child: AppText(
                                       "Yoga",
-                                      style: AppTextStyles.sm14Medium.copyWith(color: AppColors.actionPrimary, fontSize: 13),
+                                      style: AppTextStyles.sm14Medium.copyWith(
+                                        color: AppColors.actionPrimary,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -184,113 +189,183 @@ class _TrainerSignUpScreenState extends State<TrainerSignUpScreen> {
                                 right: 12.w,
                                 child: Row(
                                   children: [
-                                    Icon(Icons.description_outlined, size: 14, color: const Color(0xFF6B7280)),
+                                    Icon(
+                                      Icons.description_outlined,
+                                      size: 14,
+                                      color: const Color(0xFF6B7280),
+                                    ),
                                     SizedBox(width: 4.w),
-                                    AppText("2/10", style: AppTextStyles.sm14Regular.copyWith(color: const Color(0xFF6B7280), fontSize: 12)),
+                                    AppText(
+                                      "2/10",
+                                      style: AppTextStyles.sm14Regular.copyWith(
+                                        color: const Color(0xFF6B7280),
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("How long have you been an instructor?"),
                           CustomTextField(
                             hintText: '2yr',
-                            controller: durationController,
+                            controller: registerController
+                                .instructorExperienceController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/calendarIcon.svg",
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
-                          _buildLabel("What certifications/qualifications do you have?"),
-                          _buildAreaFieldWithCounter('e.g. NASM CPT', certController),
-                          SizedBox(height: 16.h,),
+                          _buildLabel(
+                            "What certifications/qualifications do you have?",
+                          ),
+                          _buildAreaFieldWithCounter(
+                            'e.g. NASM CPT',
+                            registerController.certificationsController,
+                          ),
+                          SizedBox(height: 16.h),
 
-                          _buildLabel("Do you host classes online or in person?"),
+                          _buildLabel(
+                            "Do you host classes online or in person?",
+                          ),
                           CustomTextField(
                             hintText: 'e.g. Online, In person, or Both',
-                            controller: hostingController,
+                            controller:
+                                registerController.classDeliveryModeController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             suffixIcon: Padding(
                               padding: const EdgeInsets.only(right: 12),
-                              child: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600),
+                              child: Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.grey.shade600,
+                              ),
                             ),
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("Password"),
                           CustomTextField(
                             hintText: '******',
-                            controller: passwordController,
+                            controller: registerController.passwordController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/lock.svg",
                             isPassword: true,
                           ),
-                          SizedBox(height: 16.h,),
+                          SizedBox(height: 16.h),
 
                           _buildLabel("Confirm Password"),
                           CustomTextField(
                             hintText: '******',
-                            controller: confirmPasswordController,
+                            controller:
+                                registerController.confirmPasswordController,
                             filColor: AppColors.bgPrimary,
                             borderColor: AppColors.actionPrimary,
                             prefixIcon: "assets/icons/lock.svg",
                             isPassword: true,
                           ),
-                          SizedBox(height: 12.h,),
-                          
+                          SizedBox(height: 12.h),
+
                           // Password strength indicator
                           Row(
                             children: [
-                              Expanded(child: Container(height: 3, decoration: BoxDecoration(color: const Color(0xFFF7869A), borderRadius: BorderRadius.circular(2)))),
+                              Expanded(
+                                child: Container(
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF7869A),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
                               SizedBox(width: 8.w),
-                              Expanded(child: Container(height: 3, decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2)))),
+                              Expanded(
+                                child: Container(
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE5E7EB),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
                               SizedBox(width: 8.w),
-                              Expanded(child: Container(height: 3, decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2)))),
+                              Expanded(
+                                child: Container(
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE5E7EB),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
                               SizedBox(width: 8.w),
-                              Expanded(child: Container(height: 3, decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2)))),
+                              Expanded(
+                                child: Container(
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE5E7EB),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           SizedBox(height: 8.h),
                           AppText(
                             "Weak password! Let's add more strength!",
                             style: AppTextStyles.sm14Regular.copyWith(
-                              color: const Color(0xFF6B7280)
+                              color: const Color(0xFF6B7280),
                             ),
                           ),
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.040),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.040,
+                          ),
 
-                          AppButton(text: "Sign up", onTap: (){}),
+                          Obx(
+                            () => AppButton(
+                              text: "Sign up",
+                              isLoading: registerController.isLoading.value,
+                              onTap: registerController.isLoading.value
+                                  ? () {}
+                                  : registerController
+                                        .continueToIdentityVerification,
+                            ),
+                          ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.040),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.040,
+                          ),
 
                           Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                AppText(
-                                  "Don't have already an account? ", 
-                                  style: AppTextStyles.sm14Regular.copyWith(
-                                    color:  AppColors.textPrimary,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AppText(
+                                "Don't have already an account? ",
+                                style: AppTextStyles.sm14Regular.copyWith(
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Get.toNamed(AppRoutes.signInScreen);
+                                },
+                                child: AppText(
+                                  "Login",
+                                  style: AppTextStyles.sm14SemiBold.copyWith(
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
-                                InkWell(
-                                  onTap: (){
-                                    Get.toNamed(AppRoutes.signInScreen);
-                                  },
-                                  child: AppText(
-                                    "Login",
-                                    style: AppTextStyles.sm14SemiBold.copyWith(
-                                      color:  AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                              ]
+                              ),
+                            ],
                           ),
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.040),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.040,
+                          ),
                         ],
                       ),
                     ),
@@ -310,13 +385,16 @@ class _TrainerSignUpScreenState extends State<TrainerSignUpScreen> {
       child: AppText(
         text,
         style: AppTextStyles.base16Medium.copyWith(
-            color: AppColors.textPrimary
+          color: AppColors.textPrimary,
         ),
       ),
     );
   }
 
-  Widget _buildAreaFieldWithCounter(String hint, TextEditingController controller) {
+  Widget _buildAreaFieldWithCounter(
+    String hint,
+    TextEditingController controller,
+  ) {
     return Stack(
       children: [
         CustomTextField(
@@ -331,9 +409,19 @@ class _TrainerSignUpScreenState extends State<TrainerSignUpScreen> {
           right: 12.w,
           child: Row(
             children: [
-              Icon(Icons.description_outlined, size: 14, color: const Color(0xFF6B7280)),
+              Icon(
+                Icons.description_outlined,
+                size: 14,
+                color: const Color(0xFF6B7280),
+              ),
               SizedBox(width: 4.w),
-              AppText("2/10", style: AppTextStyles.sm14Regular.copyWith(color: const Color(0xFF6B7280), fontSize: 12)),
+              AppText(
+                "2/10",
+                style: AppTextStyles.sm14Regular.copyWith(
+                  color: const Color(0xFF6B7280),
+                  fontSize: 12,
+                ),
+              ),
             ],
           ),
         ),
